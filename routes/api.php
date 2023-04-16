@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,9 @@ Route::group([
 ], function () {
 
     Route::get("programs", [ProgramController::class, 'index']);
+
+
+    Route::post('survey', [UserController::class, 'survey']);
     Route::group([
         'prefix' => 'auth'
     ], function () {
