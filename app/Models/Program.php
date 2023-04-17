@@ -10,13 +10,15 @@ class Program extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'description',
-        'duration',
-        'goal_addition_weight',
+        'program_name',
+        'program_description',
+        'program_duration',
+        'program_goal_weight',
+        'program_type',
         'image',
         'bmi_min',
         'bmi_max',
+
 
     ];
 }

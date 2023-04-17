@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MissionController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -28,7 +29,29 @@ Route::group([
     'prefix' => 'v1'
 ], function () {
 
+
     Route::get("programs", [ProgramController::class, 'index']);
+    Route::get("programs/{id}", [ProgramController::class, 'show']);
+
+
+    // Missions
+    Route::get("missions", [MissionController::class, 'index']);
+    Route::get("missions/{id}", [MissionController::class, 'show']);
+    Route::middleware('api.key')->group(function () {
+        // route yang memerlukan key API
+        Route::post("programs", [ProgramController::class, 'store']);
+        Route::put("programs/{id}", [ProgramController::class, 'update']);
+        Route::delete("programs/{id}", [ProgramController::class, 'destroy']);
+
+        // Missions
+        Route::post("missions", [MissionController::class, 'store']);
+        Route::put("missions/{id}", [MissionController::class, 'update']);
+        Route::delete("missions/{id}/{program_id}", [MissionController::class, 'destroy']);
+
+    });
+
+
+
 
 
     Route::post('survey', [UserController::class, 'survey']);
@@ -37,6 +60,8 @@ Route::group([
     Route::get('myprograms', [UserController::class, 'getMyPrograms']);
     // exit program
     Route::post('exitprogram', [UserController::class, 'exitProgram']);
+
+
     Route::group([
         'prefix' => 'auth'
     ], function () {
