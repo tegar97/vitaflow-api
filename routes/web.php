@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FoodServingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+//food serving route resource
+Route::resource('foodServing', FoodServingController::class);
 Route::get('/', function () {
     return view('welcome');
 });
