@@ -32,6 +32,11 @@ Route::group([
 
 
     Route::post('survey', [UserController::class, 'survey']);
+
+    // getMy program
+    Route::get('myprograms', [UserController::class, 'getMyPrograms']);
+    // exit program
+    Route::post('exitprogram', [UserController::class, 'exitProgram']);
     Route::group([
         'prefix' => 'auth'
     ], function () {
