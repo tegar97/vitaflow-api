@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MyProgram;
 use App\Models\Program;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -78,6 +79,21 @@ class UserController extends Controller
 
         // $user->programs()->sync($programs);
         $user->save();
+
+
+        // Menyimpan hasil ke my program
+        $myProgram = new MyProgram();
+
+        $myProgram->user_id = $auth->id;
+        $myProgram->program_id = $programs->id;
+        $myProgram->status = 'on-going';
+        $myProgram->join_date = date('Y-m-d');
+        $myProgram->end_date = date('Y-m-d', strtotime('+14 days'));
+
+        $myProgram->save();
+
+
+
 
         // Mengembalikan response dalam format JSON
         return response()->json([
@@ -158,6 +174,57 @@ class UserController extends Controller
 
         return $suitablePrograms;
     }
+
+
+    public function getMyPrograms(Request $request)
+    {
+        $auth = auth()->user();
+
+        $status = $request->query('status'); // ambil nilai parameter status dari URL
+
+        $query = MyProgram::where('user_id', $auth->id);
+
+        // jika parameter status ada dan nilainya valid, tambahkan query untuk mencari program dengan status yang dipilih
+        if ($status && in_array($status, ['on-going', 'cancel', 'finish'])) {
+            $query->where('status', $status);
+        }
+
+        $myPrograms = $query->get();
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $myPrograms
+        ], 200);
+    }
+
+
+    // EXIT PROGRAM
+
+    public function exitProgram(Request $request)
+    {
+
+        $auth = $request->user();
+
+        $myProgram = MyProgram::where('user_id', $auth->id)
+            ->where('program_id', $request->program_id)
+            ->whereIn('status', ['on-going'])
+            ->firstOrFail();
+
+        $myProgram->status = 'cancel';
+        $myProgram->end_date = now();
+
+        $myProgram->save();
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $myProgram
+        ], 200);
+    }
+
+
+
+
+
 
 
 }
