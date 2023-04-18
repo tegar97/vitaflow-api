@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('food_name');
             $table->string('food_image');
             $table->string('food_rating');
+            // default serving unit
+            // refrence on serving unit
+            $table->foreignId('food_serving_unit_id')->constrained('food_serving_units')->onDelete('cascade');
+            // nilai kalori per satuan
             $table->decimal('food_calories', 10, 2)->nullable();
             $table->decimal('food_fat', 10, 2)->nullable();
             $table->decimal('food_saturated_fat', 10, 2)->nullable();;

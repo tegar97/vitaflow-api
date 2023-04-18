@@ -38,6 +38,7 @@ class FoodServingController extends Controller
         //create new food serving unit
         $foodServing = new foodServingUnit();
         $foodServing->name = $request->name;
+        $foodServing->serving_size = $request->serving_size;
         $foodServing->save();
         return redirect()->route('foodServing.index');
     }
@@ -69,6 +70,7 @@ class FoodServingController extends Controller
         // update
         $foodServing = foodServingUnit::find($id);
         $foodServing->name = $request->name;
+        $foodServing->serving_size = $request->serving_size;
         $foodServing->save();
         return redirect()->route('foodServing.index');
     }

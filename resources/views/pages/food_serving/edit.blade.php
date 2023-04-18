@@ -16,6 +16,12 @@
                         placeholder="Nama Satuan (ex: gram ,porsi)">
                 </div>
 
+                <div class="form-group  mb-5">
+                    <label for="serving_size" class="mb-2">Serving size</label>
+
+                    <input type="number" class="form-control" name="serving_size" id="serving_size"
+                        value="{{ $foodServing->serving_size }}" placeholder="Serving size (ex : 100,300)">
+                </div>
 
                 <button type=" submit" class="btn btn-green text-white ">Submit</button>
             </form>

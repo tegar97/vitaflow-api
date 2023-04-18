@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('convert_food_units', function (Blueprint $table) {
+        Schema::create('food_food_serving_unit', function (Blueprint $table) {
             $table->id();
             $table->foreignId('food_id')->constrained('food')->onDelete('cascade');
             $table->foreignId('food_serving_unit_id')->constrained('food_serving_units')->onDelete('cascade');
+
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('convert_food_units');
+        Schema::dropIfExists('food_food_serving_unit');
     }
 };

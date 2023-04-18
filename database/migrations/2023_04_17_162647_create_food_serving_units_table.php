@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('food_serving_units', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            // nilai kalori per satuan
+            $table->decimal('serving_size', 10, 2)->nullable();
             $table->timestamps();
         });
     }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FoodController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\UserController;
@@ -29,6 +30,11 @@ Route::group([
     'prefix' => 'v1'
 ], function () {
 
+    // food
+    Route::get("foods", [FoodController::class, 'getFoodData']);
+    // getFoodDetail
+    Route::get("food/{foodId}", [FoodController::class, 'getFoodDetail']);
+    Route::get('/food/{foodId}/unit', [FoodController::class, 'getFoodServingUnit']);
 
     Route::get("programs", [ProgramController::class, 'index']);
     Route::get("programs/{id}", [ProgramController::class, 'show']);
