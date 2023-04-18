@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('my_missions', function (Blueprint $table) {
-            $table->date('date')->nullable();
-            
-
+        Schema::table('food', function (Blueprint $table) {
+            $table->string('default_size')->nullable();
         });
     }
 
@@ -23,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('my_missions', function (Blueprint $table) {
+        Schema::table('food', function (Blueprint $table) {
             //
         });
     }

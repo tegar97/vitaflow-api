@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('my_missions', function (Blueprint $table) {
-            $table->date('date')->nullable();
-            
-
+        Schema::create('food_serving_units', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            // nilai kalori per satuan
+            $table->decimal('serving_size', 10, 2)->nullable();
+            $table->timestamps();
         });
     }
 
@@ -23,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('my_missions', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('food_serving_units');
     }
 };
