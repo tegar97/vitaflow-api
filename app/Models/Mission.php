@@ -17,4 +17,14 @@ class Mission extends Model
         'color_Theme',
         'point',
     ];
+
+    public function program()
+    {
+        return $this->belongsTo(Program::class);
+    }
+
+    public function myMission()
+    {
+        return $this->hasMany(MyMission::class);
+    }
 }

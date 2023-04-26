@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Mission;
+use App\Models\MyDrinkActivity;
+use App\Models\MyMission;
+use App\Models\MyNutrion;
 use App\Models\MyProgram;
 use App\Models\Program;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -16,7 +21,7 @@ class UserController extends Controller
         // Check auth
         $auth = auth()->user();
 
-        if(!$auth) {
+        if (!$auth) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'
@@ -76,6 +81,8 @@ class UserController extends Controller
         $user->weight = $request->weight;
         $user->target_weight = $request->target_weight;
         $user->bmi = $bmi;
+        $user->recommend_calories = $daily_calories;
+
 
         // $user->programs()->sync($programs);
         $user->save();
@@ -91,6 +98,72 @@ class UserController extends Controller
         $myProgram->end_date = date('Y-m-d', strtotime('+14 days'));
 
         $myProgram->save();
+
+        // Algorithm
+        // 1.get all program mission
+        // 2.generate my_mission until end_date
+        $program = Program::find($programs->id);
+        // get all mission
+        $missions = Mission::where('program_id', $program->id)->get();
+
+        // generate my_mission
+        $startDate = date('Y-m-d');
+        $endDate = date('Y-m-d', strtotime('+14 days'));
+        $currentDate = $startDate;
+
+        while ($currentDate <= $endDate) {
+            // my nutrition
+            $myNutrion = new MyNutrion();
+            $myNutrion->program_id = $program->id;
+            $myNutrion->user_id = $auth->id;
+
+            $myNutrion->date = $currentDate;
+            $myNutrion->targetCalories = $daily_calories;
+            $myNutrion->activityCalories = 0;
+            $myNutrion->intakeCalories = 0;
+            $myNutrion->fat = 0;
+            $myNutrion->carbohydrate = 0;
+            $myNutrion->protein = 0;
+            $myNutrion->akg = 0;
+            $myNutrion->calorieLeft = $myNutrion->targetCalories - $myNutrion->activityCalories + $myNutrion->intakeCalories;;
+
+            $myNutrion->save();
+
+            foreach ($missions as $mission) {
+                $myMission = new MyMission();
+                $myMission->mission_id = $mission->id;
+                $myMission->user_id = $auth->id;
+                $myMission->status = 'on-going';
+                if ($mission->name == 'Catat Aktivitas Makanan') {
+                    $myMission->target = $daily_calories;
+                    $myMission->type_target = 'cal';
+                } else if ($mission->name == 'Catat Aktivitas Olahraga') {
+                    $myMission->target = 300;
+                    $myMission->type_target = 'cal';
+                } else if ($mission->name == 'Catat Aktivitas Lari/ Jalan') {
+                    $myMission->target = 2000;
+                    $myMission->type_target = 'langkah';
+                } else if ($mission->name == 'Catat asupan Minum') {
+                    $myMission->target = 8;
+                    $myMission->type_target = 'gelas';
+                } else if ($mission->name == 'Catat berat  badan') {
+                    $myMission->target = 0;
+                    $myMission->type_target = 'kg';
+                } else if ($mission->name == 'Check Kesehatan anda') {
+                    $myMission->target = 0;
+                    $myMission->type_target = 'bpm';
+                }
+                $myMission->current = 0;
+                $myMission->date = $currentDate;
+                $myMission->save();
+            }
+            $currentDate = date('Y-m-d', strtotime($currentDate . ' +1 day'));
+        }
+
+
+        // code
+
+
 
 
 
@@ -137,7 +210,6 @@ class UserController extends Controller
         } else {
             return $bmr;
         }
-
     }
 
     private function bmiClassification($bmi)
@@ -154,7 +226,6 @@ class UserController extends Controller
         }
 
         return $bmi_classification;
-
     }
 
     public function findSuitableProgram($bmi)
@@ -221,7 +292,142 @@ class UserController extends Controller
         ], 200);
     }
 
-    
+    public function getDailyUserData(Request $request)
+    {
+        $auth = auth()->user();
+        // Validasi request parameter
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date_format:Y-m-d'
+        ]);
+
+        // Jika validasi gagal, kembalikan pesan error
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        // hitung total kalori
+
+        // Ambil data MyNutrion dan MyMission dari database berdasarkan parameter date
+        $myNutrion = MyNutrion::select('date', 'targetCalories', 'calorieLeft', 'activityCalories', 'carbohydrate', 'protein', 'fat', 'intakeCalories')
+            ->where('user_id', $auth->id)
+            ->where('date', $request->input('date'))
+            ->first();
+        $allNutrionData =  $myNutrion->protein + $myNutrion->carbohydrate + $myNutrion->fat;
+        $akg = (  $myNutrion->intakeCalories /  $auth->recommend_calories) * 100;
+        // hitung persentase protein, karbohidrat, dan lemak terhadap total kalori
+        $akg_percentange =
+        round($akg, 2);
+
+        if($allNutrionData > 0) {
+            $proteinPercentage = $myNutrion->protein / $allNutrionData;
+            $carbPercentage = $myNutrion->carbohydrate /
+            $allNutrionData;
+            $fatPercentage = $myNutrion->fat /
+            $allNutrionData;
+        }else{
+            $proteinPercentage = 0;
+            $carbPercentage = 0;
+            $fatPercentage = 0;
+        }
+
+
+        $myMissions = MyMission::where('user_id', auth()->id())
+            ->where('date', $request->input('date'))
+            ->with('mission')
+            ->get()
+            ->map(function ($myMission) {
+            $percentage_success = 0;
+
+            if ($myMission->type_target == 'cal' or $myMission->type_target == 'langkah' or $myMission->type_target == 'gelas') {
+                $percentage_success = ($myMission->current / $myMission->target) * 100;
+            }
+
+            if ($myMission->status == 'finish') {
+                $percentage_success = 100;
+            }
+
+            if ($percentage_success > 100) {
+                $percentage_success = 100;
+            }
+                return [
+                    'name' => $myMission->mission->name,
+                    'description' => $myMission->mission->description,
+                    'icon' => $myMission->mission->icon,
+                    'color_theme' => $myMission->mission->color_Theme,
+                    'point' => $myMission->mission->point,
+                    'target' => $myMission->target,
+                    'current' => $myMission->current,
+                    'type_target' => $myMission->type_target,
+                    'status' => $myMission->status,
+                    'date' => $myMission->date,
+                   'percentange_success' => $percentage_success,
+                ];
+            });
+
+
+
+        // Jika tidak ada data yang ditemukan, kembalikan pesan not found
+        if (!$myNutrion || !$myMissions) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+        $totalMissions = count($myMissions);
+        $totalMissionsUnfinished = $myMissions->where('status', 'on-going')->count();
+        $totalMissionsFinished = $myMissions->where('status', 'finished')->count();
+        // Kembalikan data dalam format JSON
+        return response()->json([
+            'message' => 'Success',
+            'data' => [
+                "my_nutrion" => [
+                    "date" => $myNutrion->date,
+                    "targetCalories" => $myNutrion->targetCalories,
+                    "calorieLeft" => $myNutrion->calorieLeft,
+                    "activityCalories" => $myNutrion->activityCalories,
+                    "carbohydrate" => $myNutrion->carbohydrate,
+                    "protein" => $myNutrion->protein,
+                    "fat" => $myNutrion->fat,
+                    "intakeCalories" => $myNutrion->intakeCalories,
+                    "proteinPercentage" => $proteinPercentage,
+                    "carbPercentage" => $carbPercentage,
+                    "fatPercentage" => $fatPercentage,
+                    "akg" => $akg_percentange
+                ],
+                'total_missions' => $totalMissions,
+                'total_missions_unfinished' => $totalMissionsUnfinished,
+                'total_missions_finished' => $totalMissionsFinished,
+                'my_missions' => $myMissions
+            ]
+        ], 200);
+    }
+
+    //  drink mission
+    public function storeDrink(Request $request)
+    {
+        $auth = auth()->user();
+
+        $mission = Mission::where('name', "Catat asupan Minum")->first();
+
+        // check if mission is exist
+        if (!$mission) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+
+
+
+       $myMission = MyMission::where('user_id', $auth->id)
+            ->where('mission_id', $mission->id)
+            ->where('date', date('Y-m-d'))
+            ->first();
+
+        if (!$myMission) {
+            return response()->json(['error' => 'MyMission not found'], 404);
+        }
+
+        // store to my_drink_activity
+        $myDrinkActivity = new MyDrinkActivity();
+        $myDrinkActivity->user_id = $auth->id;
+        $myDrinkActivity->my_mission_id = $myMission->id;
+        $myDrinkActivity->value = 1;
+        $myDrinkActivity->date = date('Y-m-d');
+        $myDrinkActivity->save();
 
 
 
@@ -229,4 +435,21 @@ class UserController extends Controller
 
 
 
+
+        $myMission->current += 1;
+
+
+        if($myMission->current >= $myMission->target){
+            $myMission->status = 'finish';
+            $myMission->save();
+        }
+
+        $myMission->save();
+
+
+        return response()->json([
+            'message' => 'Success',
+
+        ], 200);
+    }
 }

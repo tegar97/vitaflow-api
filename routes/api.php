@@ -30,11 +30,14 @@ Route::group([
     'prefix' => 'v1'
 ], function () {
 
+
+
     // food
     Route::get("foods", [FoodController::class, 'getFoodData']);
     // getFoodDetail
     Route::get("food/{foodId}", [FoodController::class, 'getFoodDetail']);
     Route::get('/food/{foodId}/unit', [FoodController::class, 'getFoodServingUnit']);
+
 
     Route::get("programs", [ProgramController::class, 'index']);
     Route::get("programs/{id}", [ProgramController::class, 'show']);
@@ -67,7 +70,11 @@ Route::group([
     // exit program
     Route::post('exitprogram', [UserController::class, 'exitProgram']);
 
+    Route::get('/getDailyData', [UserController::class, 'getDailyUserData']);
 
+
+    // drink mission
+    Route::post('/storeDrink', [UserController::class, 'storeDrink']);
     Route::group([
         'prefix' => 'auth'
     ], function () {
@@ -77,6 +84,7 @@ Route::group([
         Route::post('me', [AuthController::class, 'me']);
 
 
+            // get daily users data
 
 
 

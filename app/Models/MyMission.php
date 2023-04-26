@@ -13,8 +13,18 @@ class MyMission extends Model
         'user_id',
         'mission_id',
         'status',
-        'target',
+    'target',
         'current',
         'type_target'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function mission()
+    {
+        return $this->belongsTo(Mission::class);
+    }
 }
