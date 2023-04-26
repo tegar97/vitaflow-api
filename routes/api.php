@@ -74,7 +74,16 @@ Route::group([
 
 
     // drink mission
-    Route::post('/storeDrink', [UserController::class, 'storeDrink']);
+    Route::post('//drink/store', [UserController::class, 'storeDrink']);
+    Route::get("/drink/history", [UserController::class, 'getUserDrinks']);
+
+    // store weight track
+    Route::post('/weight-track/store', [UserController::class, 'storeWeightTrackData']);
+    Route::get('/weight-track/history', [UserController::class, 'getUserWeightTrackData']);
+
+    // step track
+    Route::post('/step-track/store', [UserController::class, 'storeStepTrackData']);
+    Route::get('/step-track/history', [UserController::class, 'getUserStepTrackData']);
     Route::group([
         'prefix' => 'auth'
     ], function () {

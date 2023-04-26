@@ -7,6 +7,8 @@ use App\Models\MyDrinkActivity;
 use App\Models\MyMission;
 use App\Models\MyNutrion;
 use App\Models\MyProgram;
+use App\Models\MyRunningActivity;
+use App\Models\MyWeightTrackActivity;
 use App\Models\Program;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -451,5 +453,225 @@ class UserController extends Controller
             'message' => 'Success',
 
         ], 200);
+
+
+
+
+
     }
+
+    // get drink history by date
+    public function getUserDrinks(Request $request)
+    {
+        $auth = auth()->user();
+        $date = $request->input('date', date('Y-m-d'));
+        $days = $request->input('days', 7); // default to 7 days if not specified
+
+        $endDate = date('Y-m-d', strtotime($date));
+        $startDate = date('Y-m-d', strtotime("-$days day", strtotime($endDate)));
+
+
+
+
+        $myDrinkActivities = MyDrinkActivity::where('user_id', $auth->id)
+            ->whereBetween('date', [$startDate, $endDate])->select('date', 'value')
+            ->select('date', 'value')
+            ->get();
+
+
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $myDrinkActivities
+        ], 200);
+
+
+    }
+
+    // store weight track
+    public function storeWeightTrackData(Request $request)
+    {
+        $auth = auth()->user();
+
+        // validator request
+        $validator = Validator::make($request->all(), [
+            'weight' => 'required|numeric',
+        ]);
+
+
+        // check if validator is failed
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $mission = Mission::where('name', 'like', '%catat berat badan%')->first();
+
+        // check if mission is exist
+        if (!$mission) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+
+
+
+        $myMission = MyMission::where('user_id', $auth->id)
+            ->where('mission_id', $mission->id)
+            ->where('date', date('Y-m-d'))
+            ->first();
+
+        if (!$myMission) {
+            return response()->json(['error' => 'MyMission not found'], 404);
+        }
+
+        // store to my_drink_activity
+        $myDrinkActivity = new MyWeightTrackActivity();
+        $myDrinkActivity->user_id = $auth->id;
+        $myDrinkActivity->my_mission_id = $myMission->id;
+        $myDrinkActivity->value = $request->weight;
+        $myDrinkActivity->date = date('Y-m-d');
+        $myDrinkActivity->save();
+
+
+
+
+
+
+
+
+        $myMission->current =  $request->weight;
+
+
+        if ($myMission->current >= $myMission->target) {
+            $myMission->status = 'finish';
+            $myMission->save();
+        }
+
+        $myMission->save();
+
+
+        return response()->json([
+            'message' => 'Success',
+
+        ], 200);
+
+    }
+    // get weight track
+    public function getUserWeightTrackData(Request $request)
+    {
+        $auth = auth()->user();
+        $date = $request->input('date', date('Y-m-d'));
+        $days = $request->input('days', 7); // default to 7 days if not specified
+
+        $endDate = date('Y-m-d', strtotime($date));
+        $startDate = date('Y-m-d', strtotime("-$days day", strtotime($endDate)));
+
+        $myWeightTrack = MyWeightTrackActivity::where('user_id', $auth->id)
+            ->whereBetween('date', [$startDate, $endDate])->select('date', 'value')
+            ->get();
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $myWeightTrack
+        ], 200);
+
+
+    }
+
+
+    // store running acivity like storeDrink() function
+    public function storeStepTrackData(Request $request)
+    {
+        $auth = auth()->user();
+
+        // validator request
+        $validator = Validator::make($request->all(), [
+            'step' => 'required|numeric',
+        ]);
+
+
+        // check if validator is failed
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $mission = Mission::where('name', 'like', '%Catat Aktivitas Lari/ Jalan%')->first();
+
+        // check if mission is exist
+        if (!$mission) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+
+        $myMission = MyMission::where('user_id', $auth->id)
+            ->where('mission_id', $mission->id)
+            ->where('date', date('Y-m-d'))
+            ->first();
+
+        if (!$myMission) {
+            return response()->json(['error' => 'MyMission not found'], 404);
+        }
+
+        // store to my_drink_activity
+        $myRunningActivity = new MyRunningActivity();
+        $myRunningActivity->user_id = $auth->id;
+        $myRunningActivity->my_mission_id = $myMission->id;
+        $myRunningActivity->value = $request->step;
+        $myRunningActivity->date = date('Y-m-d');
+        $myRunningActivity->save();
+
+
+
+
+
+
+
+
+        $myMission->current +=  $request->step;
+
+
+        if ($myMission->current >= $myMission->target) {
+            $myMission->status = 'finish';
+            $myMission->save();
+        }
+
+        $myMission->save();
+
+
+        return response()->json([
+            'message' => 'Success',
+
+        ], 200);
+
+
+
+
+
+
+
+    }
+
+    // get running activity
+    public function getUserStepTrackData(Request $request)
+    {
+        $auth = auth()->user();
+        $date = $request->input('date', date('Y-m-d'));
+        $days = $request->input('days', 7); // default to 7 days if not specified
+
+        $endDate = date('Y-m-d', strtotime($date));
+        $startDate = date('Y-m-d', strtotime("-$days day", strtotime($endDate)));
+
+        $myRunningActivity = MyRunningActivity::where('user_id', $auth->id)
+            ->whereBetween('date', [$startDate, $endDate])->select('date', 'value')
+            ->get();
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $myRunningActivity
+        ], 200);
+
+    }
+
+
+
+
+
+
 }
