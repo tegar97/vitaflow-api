@@ -84,6 +84,20 @@ Route::group([
     // step track
     Route::post('/step-track/store', [UserController::class, 'storeStepTrackData']);
     Route::get('/step-track/history', [UserController::class, 'getUserStepTrackData']);
+
+    // health track
+
+    Route::post('/health-track/store', [UserController::class, 'storeHealthTrackData']);
+    Route::get('/health-track/history', [UserController::class, 'getUserHealthTrackData']);
+
+
+    // Exercise track data
+    Route::post('/exercise-track/store', [UserController::class, 'storeExerciseTrackData']);
+    Route::get('/exercise-track/calori-burn', [UserController::class, 'getSportCaloriBurn']);
+    Route::get('/exercise-track/history', [UserController::class, 'getUseSportAcivityData']);
+
+
+
     Route::group([
         'prefix' => 'auth'
     ], function () {

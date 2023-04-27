@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\exerciseType;
+use App\Models\HealthTrackActivity;
 use App\Models\Mission;
 use App\Models\MyDrinkActivity;
 use App\Models\MyMission;
@@ -10,6 +12,7 @@ use App\Models\MyProgram;
 use App\Models\MyRunningActivity;
 use App\Models\MyWeightTrackActivity;
 use App\Models\Program;
+use App\Models\sportTrackingActivity;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -314,18 +317,18 @@ class UserController extends Controller
             ->where('date', $request->input('date'))
             ->first();
         $allNutrionData =  $myNutrion->protein + $myNutrion->carbohydrate + $myNutrion->fat;
-        $akg = (  $myNutrion->intakeCalories /  $auth->recommend_calories) * 100;
+        $akg = ($myNutrion->intakeCalories /  $auth->recommend_calories) * 100;
         // hitung persentase protein, karbohidrat, dan lemak terhadap total kalori
         $akg_percentange =
-        round($akg, 2);
+            round($akg, 2);
 
-        if($allNutrionData > 0) {
+        if ($allNutrionData > 0) {
             $proteinPercentage = $myNutrion->protein / $allNutrionData;
             $carbPercentage = $myNutrion->carbohydrate /
-            $allNutrionData;
+                $allNutrionData;
             $fatPercentage = $myNutrion->fat /
-            $allNutrionData;
-        }else{
+                $allNutrionData;
+        } else {
             $proteinPercentage = 0;
             $carbPercentage = 0;
             $fatPercentage = 0;
@@ -337,19 +340,19 @@ class UserController extends Controller
             ->with('mission')
             ->get()
             ->map(function ($myMission) {
-            $percentage_success = 0;
+                $percentage_success = 0;
 
-            if ($myMission->type_target == 'cal' or $myMission->type_target == 'langkah' or $myMission->type_target == 'gelas') {
-                $percentage_success = ($myMission->current / $myMission->target) * 100;
-            }
+                if ($myMission->type_target == 'cal' or $myMission->type_target == 'langkah' or $myMission->type_target == 'gelas') {
+                    $percentage_success = ($myMission->current / $myMission->target) * 100;
+                }
 
-            if ($myMission->status == 'finish') {
-                $percentage_success = 100;
-            }
+                if ($myMission->status == 'finish') {
+                    $percentage_success = 100;
+                }
 
-            if ($percentage_success > 100) {
-                $percentage_success = 100;
-            }
+                if ($percentage_success > 100) {
+                    $percentage_success = 100;
+                }
                 return [
                     'name' => $myMission->mission->name,
                     'description' => $myMission->mission->description,
@@ -361,7 +364,7 @@ class UserController extends Controller
                     'type_target' => $myMission->type_target,
                     'status' => $myMission->status,
                     'date' => $myMission->date,
-                   'percentange_success' => $percentage_success,
+                    'percentange_success' => $percentage_success,
                 ];
             });
 
@@ -414,7 +417,7 @@ class UserController extends Controller
 
 
 
-       $myMission = MyMission::where('user_id', $auth->id)
+        $myMission = MyMission::where('user_id', $auth->id)
             ->where('mission_id', $mission->id)
             ->where('date', date('Y-m-d'))
             ->first();
@@ -441,7 +444,7 @@ class UserController extends Controller
         $myMission->current += 1;
 
 
-        if($myMission->current >= $myMission->target){
+        if ($myMission->current >= $myMission->target) {
             $myMission->status = 'finish';
             $myMission->save();
         }
@@ -453,11 +456,6 @@ class UserController extends Controller
             'message' => 'Success',
 
         ], 200);
-
-
-
-
-
     }
 
     // get drink history by date
@@ -484,8 +482,6 @@ class UserController extends Controller
             'message' => 'Success',
             'data' => $myDrinkActivities
         ], 200);
-
-
     }
 
     // store weight track
@@ -552,7 +548,6 @@ class UserController extends Controller
             'message' => 'Success',
 
         ], 200);
-
     }
     // get weight track
     public function getUserWeightTrackData(Request $request)
@@ -572,8 +567,6 @@ class UserController extends Controller
             'message' => 'Success',
             'data' => $myWeightTrack
         ], 200);
-
-
     }
 
 
@@ -639,13 +632,6 @@ class UserController extends Controller
             'message' => 'Success',
 
         ], 200);
-
-
-
-
-
-
-
     }
 
     // get running activity
@@ -666,8 +652,214 @@ class UserController extends Controller
             'message' => 'Success',
             'data' => $myRunningActivity
         ], 200);
+    }
+
+    public function storeHealthTrackData(Request $request)
+    {
+        $auth = auth()->user();
+
+        // validator request
+        $validator = Validator::make($request->all(), [
+            'bpm' => 'required|numeric',
+        ]);
+
+
+        // check if validator is failed
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $mission = Mission::where('name', 'like', '%Check Kesehatan anda%')->first();
+
+        // check if mission is exist
+        if (!$mission) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+
+        $myMission = MyMission::where('user_id', $auth->id)
+            ->where('mission_id', $mission->id)
+            ->where('date', date('Y-m-d'))
+            ->first();
+
+        if (!$myMission) {
+            return response()->json(['error' => 'MyMission not found'], 404);
+        }
+
+        // store to my_drink_activity
+        $myHealthTrack = new HealthTrackActivity();
+        $myHealthTrack->user_id = $auth->id;
+        $myHealthTrack->my_mission_id = $myMission->id;
+        $myHealthTrack->value = $request->bpm;
+        $myHealthTrack->date = date('Y-m-d');
+        $myHealthTrack->save();
+
+
+
+
+
+
+
+
+        $myMission->current =  $request->bpm;
+
+
+
+        $myMission->status = 'finish';
+
+
+
+        $myMission->save();
+
+
+        return response()->json([
+            'message' => 'Success',
+
+        ], 200);
+
+
+
 
     }
+
+    public function getUserHealthTrackData(Request $request)
+    {
+        $auth = auth()->user();
+        $date = $request->input('date', date('Y-m-d'));
+        $days = $request->input('days', 7); // default to 7 days if not specified
+
+        $endDate = date('Y-m-d', strtotime($date));
+        $startDate = date('Y-m-d', strtotime("-$days day", strtotime($endDate)));
+
+        $healthActivities = HealthTrackActivity::where('user_id', $auth->id)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->select('date', 'value')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $healthData = [];
+        $totalBpm = 0;
+
+        foreach ($healthActivities as $activity) {
+            $bpm = $activity->value;
+            $healthData[] = [
+                'date' => $activity->date,
+                'bpm' => $bpm
+            ];
+            $totalBpm += $bpm;
+        }
+
+        $count = count($healthData);
+        $avgBpm = ($count > 0) ? $totalBpm / $count : 0;
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $healthActivities,
+            'chart ' => $healthData,
+            'average_bpm' => $avgBpm
+        ], 200);
+    }
+
+    public function storeExerciseTrackData(Request $request)
+    {
+        $auth = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'exercises.*.exercise_type_id' => 'required|exists:exercise_types,id',
+            'exercises.*.duration' => 'required|integer|min:1'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $mission = Mission::where('name', 'like', '%Catat Aktivitas Olahraga%')->first();
+
+        if (!$mission) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+
+        $myMission = MyMission::where('user_id', $auth->id)
+            ->where('mission_id', $mission->id)
+            ->where('date', date('Y-m-d'))
+            ->first();
+
+        if (!$myMission) {
+            return response()->json(['error' => 'MyMission not found'], 404);
+        }
+
+        $exercises = $request->exercises;
+        $totalBurnedCalories = 0;
+
+        foreach ($exercises as $exercise) {
+            $exercise_id = $exercise['exercise_type_id'];
+            $duration = $exercise['duration'];
+
+            $exercise = exerciseType::find($exercise_id);
+            $burnedCalories = ($exercise->calories_burned_estimate * $duration) / 60; // convert to calories burned based on duration
+
+            $totalBurnedCalories += $burnedCalories;
+
+            $myExerciseTrack = new sportTrackingActivity();
+            $myExerciseTrack->user_id = $auth->id;
+            $myExerciseTrack->my_mission_id = $myMission->id;
+            $myExerciseTrack->exercise_type_id = $exercise_id;
+            $myExerciseTrack->duration = $duration;
+            $myExerciseTrack->burn_calories = $burnedCalories;
+            $myExerciseTrack->date = date('Y-m-d');
+            $myExerciseTrack->save();
+        }
+
+        $myMission->current += $totalBurnedCalories;
+
+        if ($myMission->current >= $myMission->target) {
+            $myMission->status = 'finish';
+            $myMission->save();
+        }
+
+        return response()->json([
+            'message' => 'Success',
+        ], 200);
+    }
+
+    public function getSportCaloriBurn() {
+        $auth = auth()->user();
+        $today = date('Y-m-d');
+
+        $totalBurnedCalories = sportTrackingActivity::where('user_id', $auth->id)
+            ->where('date', $today)
+            ->sum('burn_calories');
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $totalBurnedCalories
+        ], 200);
+
+
+    }
+    public function getUseSportAcivityData(Request $request)
+    {
+        $auth = auth()->user();
+        $date = $request->input('date', date('Y-m-d'));
+        $days = $request->input('days', 7); // default to 7 days if not specified
+
+        $endDate = date('Y-m-d', strtotime($date));
+        $startDate = date('Y-m-d', strtotime("-$days day", strtotime($endDate)));
+
+        $mySportActivity = sportTrackingActivity::with('exerciseType')->where('user_id', $auth->id)
+            ->whereBetween('date', [$startDate, $endDate])->select('*')
+            ->get();
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $mySportActivity
+        ], 200);
+    }
+
+
+
+
+
+
 
 
 
