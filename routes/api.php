@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\MissionController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -30,6 +33,13 @@ Route::group([
     'prefix' => 'v1'
 ], function () {
 
+    // Vitamart
+    // category
+    Route::get("categories", [CategoryController::class, 'getCategoryData']);
+    Route::get('products', [ProductController::class, 'getProductByCategory']);
+    Route::get('product/{productId}', [ProductController::class, 'getProductDetail']);
+    Route::get('articles', [ArticleController::class, 'getArticleData']);
+    Route::get('article/{articleId}', [ArticleController::class, 'getArticleDetail']);
 
 
     // food
@@ -95,6 +105,10 @@ Route::group([
     Route::post('/exercise-track/store', [UserController::class, 'storeExerciseTrackData']);
     Route::get('/exercise-track/calori-burn', [UserController::class, 'getSportCaloriBurn']);
     Route::get('/exercise-track/history', [UserController::class, 'getUseSportAcivityData']);
+
+    // food
+    Route::post('/foods-track/store', [UserController::class, 'storeFoodTrackData']);
+    Route::get('/foods-track/history', [UserController::class, 'getUserFoodTrackData']);
 
 
 

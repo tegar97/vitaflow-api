@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\exerciseType;
+use App\Models\Food;
+use App\Models\FoodActivityTracking;
 use App\Models\HealthTrackActivity;
 use App\Models\Mission;
 use App\Models\MyDrinkActivity;
@@ -15,6 +17,7 @@ use App\Models\Program;
 use App\Models\sportTrackingActivity;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -447,6 +450,11 @@ class UserController extends Controller
         if ($myMission->current >= $myMission->target) {
             $myMission->status = 'finish';
             $myMission->save();
+
+            // find user and add point
+            $user = User::find($auth->id);
+            $user->point += $mission->point;
+            $user->save();
         }
 
         $myMission->save();
@@ -539,6 +547,11 @@ class UserController extends Controller
         if ($myMission->current >= $myMission->target) {
             $myMission->status = 'finish';
             $myMission->save();
+
+            // find user and add point
+            $user = User::find($auth->id);
+            $user->point += $mission->point;
+            $user->save();
         }
 
         $myMission->save();
@@ -623,6 +636,12 @@ class UserController extends Controller
         if ($myMission->current >= $myMission->target) {
             $myMission->status = 'finish';
             $myMission->save();
+
+
+            // find user and add point
+            $user = User::find($auth->id);
+            $user->point += $mission->point;
+            $user->save();
         }
 
         $myMission->save();
@@ -681,6 +700,8 @@ class UserController extends Controller
             ->where('date', date('Y-m-d'))
             ->first();
 
+
+
         if (!$myMission) {
             return response()->json(['error' => 'MyMission not found'], 404);
         }
@@ -708,17 +729,20 @@ class UserController extends Controller
 
 
 
+
         $myMission->save();
+
+        // find user and add point
+        $user = User::find($auth->id);
+        $user->point += $mission->point;
+        $user->save();
+
 
 
         return response()->json([
             'message' => 'Success',
 
         ], 200);
-
-
-
-
     }
 
     public function getUserHealthTrackData(Request $request)
@@ -768,6 +792,7 @@ class UserController extends Controller
             'exercises.*.duration' => 'required|integer|min:1'
         ]);
 
+
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
@@ -811,9 +836,21 @@ class UserController extends Controller
 
         $myMission->current += $totalBurnedCalories;
 
+        // add to mynutrion activityCalori
+
+        $userNutrion = MyNutrion::where('user_id', $auth->id)->where('date', date('Y-m-d'))->first();
+        $userNutrion->activityCalories += $totalBurnedCalories;
+        // add calorieleft
+        $userNutrion->calorieLeft = $userNutrion->calorieLeft =  $totalBurnedCalories;
+        $userNutrion->save();
         if ($myMission->current >= $myMission->target) {
             $myMission->status = 'finish';
             $myMission->save();
+
+            // find user and add point
+            $user = User::find($auth->id);
+            $user->point += $mission->point;
+            $user->save();
         }
 
         return response()->json([
@@ -821,7 +858,8 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function getSportCaloriBurn() {
+    public function getSportCaloriBurn()
+    {
         $auth = auth()->user();
         $today = date('Y-m-d');
 
@@ -829,12 +867,13 @@ class UserController extends Controller
             ->where('date', $today)
             ->sum('burn_calories');
 
+
+
+
         return response()->json([
             'message' => 'Success',
             'data' => $totalBurnedCalories
         ], 200);
-
-
     }
     public function getUseSportAcivityData(Request $request)
     {
@@ -849,6 +888,8 @@ class UserController extends Controller
             ->whereBetween('date', [$startDate, $endDate])->select('*')
             ->get();
 
+
+
         return response()->json([
             'message' => 'Success',
             'data' => $mySportActivity
@@ -856,13 +897,175 @@ class UserController extends Controller
     }
 
 
+    // food activity
+    public function storeFoodTrackData(Request $request)
+    {
+        $auth = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+
+            'foods.*.food_id' => 'required|exists:food,id',
+            'foods.*.calorie_intake' => 'required|integer|min:1',
+            'foods.*.carbohydrate_intake' => 'required|integer|min:1',
+            'foods.*.protein_intake' => 'required|integer|min:1',
+            'foods.*.fat_intake' => 'required|integer|min:1',
+            'foods.*.size' => 'required|integer|min:1',
+            'foods.*.unit' => 'required|string',
+        ]);
+
+
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $mission = Mission::where('name', 'like', '%Catat Aktivitas Makanan%')->first();
+
+        if (!$mission) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+
+        $myMission = MyMission::where('user_id', $auth->id)
+            ->where('mission_id', $mission->id)
+            ->where('date', date('Y-m-d'))
+            ->first();
+
+        if (!$myMission) {
+            return response()->json(['error' => 'MyMission not found'], 404);
+        }
+
+
+        $foods = $request->foods;
+        $totalCaloriesIntake = 0;
+        $totalCarboIntake = 0;
+        $totalProteinIntake = 0;
+        $totalFatIntake = 0;
+
+
+        foreach ($foods as $food) {
+            $food_id = $food['food_id'];
+            $calorie_intake = $food['calorie_intake'];
+            $carbohydrate_intake = $food['carbohydrate_intake'];
+            $protein_intake = $food['protein_intake'];
+            $fat_intake = $food['fat_intake'];
+            $size = $food['size'];
+            $unit = $food['unit'];
+
+            $food = Food::find($food_id);
+
+            $totalCaloriesIntake += $calorie_intake;
+            $totalCarboIntake += $carbohydrate_intake;
+            $totalProteinIntake += $protein_intake;
+            $totalFatIntake += $fat_intake;
+
+
+            $foodActivityTrack = new FoodActivityTracking();
+            $foodActivityTrack->user_id = $auth->id;
+            $foodActivityTrack->my_mission_id = $myMission->id;
+            $foodActivityTrack->food_id = $food_id;
+            $foodActivityTrack->calorie_intake = $calorie_intake;
+            $foodActivityTrack->carbohydrate_intake = $carbohydrate_intake;
+            $foodActivityTrack->protein_intake = $protein_intake;
+            $foodActivityTrack->fat_intake = $fat_intake;
+            $foodActivityTrack->size = $size;
+            $foodActivityTrack->unit = $unit;
+            $foodActivityTrack->meal_type = $request->meal_type;
+            $foodActivityTrack->date = date('Y-m-d');
+            $foodActivityTrack->save();
+        }
+
+        $myMission->current += $totalCaloriesIntake;
+
+        $userNutrion = MyNutrion::where('user_id', $auth->id)->where('date', date('Y-m-d'))->first();
+
+        // STORE total cal intake
+        $userNutrion->intakeCalories += $totalCaloriesIntake;
+        $userNutrion->fat += $totalCarboIntake;
+        $userNutrion->carbohydrate += $totalProteinIntake;
+        $userNutrion->protein += $totalFatIntake;
+
+        // update calori left
+        $userNutrion->calorieLeft = $userNutrion->targetCalories - $userNutrion->intakeCalories;
+        $userNutrion->save();
 
 
 
 
 
 
+        if ($myMission->current >= $myMission->target) {
+            $myMission->status = 'finish';
+            $myMission->save();
 
+            // find user and add point
+            $user = User::find($auth->id);
+            $user->point += $mission->point;
+            $user->save();
+        }
+
+        $myMission->save();
+
+        return response()->json([
+            'message' => 'Success',
+        ], 200);
+    }
+
+    public function getUserFoodTrackData(Request $request){
+        $date = $request->date; // tanggal yang diinput user
+
+        if($date == null){
+            $date = date('Y-m-d');
+        }
+        $auth = auth()->user(); // user yang sedang login
+
+        $foods = DB::table('food_activity_trackings')
+            ->select('meal_type', 'food.food_name', 'calorie_intake', 'carbohydrate_intake', 'protein_intake', 'fat_intake', 'size', 'unit')
+            ->join('food', 'food_activity_trackings.food_id', '=', 'food.id')
+            ->where('food_activity_trackings.user_id', $auth->id)
+            ->where('food_activity_trackings.date', $date)
+            ->groupBy('meal_type', 'food.food_name', 'calorie_intake', 'carbohydrate_intake', 'protein_intake', 'fat_intake', 'size', 'unit')
+            ->get()
+            ->groupBy('meal_type');
+
+        // get my nutrion
+        $myNutrion = MyNutrion::where('user_id', $auth->id)->where('date', $date)->first();
+
+        $nutrion = [
+            'calorieLeft' => $myNutrion->calorieLeft,
+            'carbohydrate' => $myNutrion->carbohydrate,
+            'protein' => $myNutrion->protein,
+            'fat' => $myNutrion->fat,
+            'intakeCalories' => $myNutrion->intakeCalories,
+            'targetCalories' => $myNutrion->targetCalories,
+
+            //percentange calori with targetCalorie
+            'calorieLeftPercentage' => ($myNutrion->calorieLeft / $myNutrion->targetCalories) * 100,
+            'intakeCaloriesPercentage' => ($myNutrion->intakeCalories / $myNutrion->targetCalories) * 100,
+
+            // percetange carbo , protein , fat  (carbo+ protein + fat = 100%)
+
+            'carbohydratePercentage' => ($myNutrion->carbohydrate / ($myNutrion->carbohydrate + $myNutrion->protein + $myNutrion->fat)) * 100,
+            'proteinPercentage' => ($myNutrion->protein / ($myNutrion->carbohydrate + $myNutrion->protein + $myNutrion->fat)) * 100,
+            'fatPercentage' => ($myNutrion->fat / ($myNutrion->carbohydrate + $myNutrion->protein + $myNutrion->fat)) * 100,
+
+
+        ];
+
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => [
+                'foods' => $foods,
+                'nutrion' => $nutrion,
+
+            ],
+
+        ], 200);
+
+
+
+
+    }
 
 
 

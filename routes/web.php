@@ -1,9 +1,14 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CategoryArticleController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\ExerciseTypeController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\FoodServingController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProgramController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,7 +36,11 @@ Route::get('exercise/{id}/workout/create', [ExerciseController::class, 'createEx
 Route::post('exercise/{id}/workout', [ExerciseController::class, 'storeExerciseWorkout'])->name('storeExerciseWorkout');
 
 
+Route::resource('categories', CategoryController::class);
+Route::resource('products', ProductController::class);
 
+Route::resource('category-articles', CategoryArticleController::class);
+Route::resource('articles', ArticleController::class);
 
 Route::get('/', function () {
     return view('welcome');
