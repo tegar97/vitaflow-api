@@ -13,7 +13,7 @@ class MyMission extends Model
         'user_id',
         'mission_id',
         'status',
-    'target',
+        'target',
         'current',
         'type_target'
     ];

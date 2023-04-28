@@ -142,25 +142,26 @@ class UserController extends Controller
                 $myMission->mission_id = $mission->id;
                 $myMission->user_id = $auth->id;
                 $myMission->status = 'on-going';
-                if ($mission->name == 'Catat Aktivitas Makanan') {
+                if (strtolower(trim($mission->name)) == 'catat aktivitas makanan') {
                     $myMission->target = $daily_calories;
                     $myMission->type_target = 'cal';
-                } else if ($mission->name == 'Catat Aktivitas Olahraga') {
+                } else if (strtolower(trim($mission->name)) == 'catat aktivitas olahraga') {
                     $myMission->target = 300;
                     $myMission->type_target = 'cal';
-                } else if ($mission->name == 'Catat Aktivitas Lari/ Jalan') {
+                } else if (strtolower(trim($mission->name)) == 'catat aktivitas lari/ jalan') {
                     $myMission->target = 2000;
                     $myMission->type_target = 'langkah';
-                } else if ($mission->name == 'Catat asupan Minum') {
+                } else if (strtolower(trim($mission->name)) == 'catat asupan minum') {
                     $myMission->target = 8;
                     $myMission->type_target = 'gelas';
-                } else if ($mission->name == 'Catat berat  badan') {
+                } else if (strtolower(trim($mission->name)) == 'catat berat badan') {
                     $myMission->target = 0;
                     $myMission->type_target = 'kg';
-                } else if ($mission->name == 'Check Kesehatan anda') {
+                } else if (strtolower(trim($mission->name)) == 'check kesehatan anda') {
                     $myMission->target = 0;
                     $myMission->type_target = 'bpm';
                 }
+
                 $myMission->current = 0;
                 $myMission->date = $currentDate;
                 $myMission->save();
@@ -448,14 +449,17 @@ class UserController extends Controller
 
 
         if ($myMission->current >= $myMission->target) {
-            $myMission->status = 'finish';
-            $myMission->save();
+            if ($myMission->status != 'finish') { // tambahkan pengecekan ini
+                $myMission->status = 'finish';
+                $myMission->save();
 
-            // find user and add point
-            $user = User::find($auth->id);
-            $user->point += $mission->point;
-            $user->save();
+                // find user and add point
+                $user = User::find($auth->id);
+                $user->point += $mission->point;
+                $user->save();
+            }
         }
+
 
         $myMission->save();
 
@@ -545,14 +549,17 @@ class UserController extends Controller
 
 
         if ($myMission->current >= $myMission->target) {
-            $myMission->status = 'finish';
-            $myMission->save();
+            if ($myMission->status != 'finish') { // tambahkan pengecekan ini
+                $myMission->status = 'finish';
+                $myMission->save();
 
-            // find user and add point
-            $user = User::find($auth->id);
-            $user->point += $mission->point;
-            $user->save();
+                // find user and add point
+                $user = User::find($auth->id);
+                $user->point += $mission->point;
+                $user->save();
+            }
         }
+
 
         $myMission->save();
 
@@ -634,14 +641,15 @@ class UserController extends Controller
 
 
         if ($myMission->current >= $myMission->target) {
-            $myMission->status = 'finish';
-            $myMission->save();
+            if ($myMission->status != 'finish') { // tambahkan pengecekan ini
+                $myMission->status = 'finish';
+                $myMission->save();
 
-
-            // find user and add point
-            $user = User::find($auth->id);
-            $user->point += $mission->point;
-            $user->save();
+                // find user and add point
+                $user = User::find($auth->id);
+                $user->point += $mission->point;
+                $user->save();
+            }
         }
 
         $myMission->save();
@@ -844,13 +852,15 @@ class UserController extends Controller
         $userNutrion->calorieLeft = $userNutrion->calorieLeft =  $totalBurnedCalories;
         $userNutrion->save();
         if ($myMission->current >= $myMission->target) {
-            $myMission->status = 'finish';
-            $myMission->save();
+            if ($myMission->status != 'finish') { // tambahkan pengecekan ini
+                $myMission->status = 'finish';
+                $myMission->save();
 
-            // find user and add point
-            $user = User::find($auth->id);
-            $user->point += $mission->point;
-            $user->save();
+                // find user and add point
+                $user = User::find($auth->id);
+                $user->point += $mission->point;
+                $user->save();
+            }
         }
 
         return response()->json([
@@ -994,13 +1004,15 @@ class UserController extends Controller
 
 
         if ($myMission->current >= $myMission->target) {
-            $myMission->status = 'finish';
-            $myMission->save();
+            if ($myMission->status != 'finish') { // tambahkan pengecekan ini
+                $myMission->status = 'finish';
+                $myMission->save();
 
-            // find user and add point
-            $user = User::find($auth->id);
-            $user->point += $mission->point;
-            $user->save();
+                // find user and add point
+                $user = User::find($auth->id);
+                $user->point += $mission->point;
+                $user->save();
+            }
         }
 
         $myMission->save();
