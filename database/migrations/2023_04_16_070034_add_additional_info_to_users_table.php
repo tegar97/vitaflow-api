@@ -20,6 +20,7 @@ return new class extends Migration
             $table->double('bmi')->nullable();
             $table->enum('goal', ['gain', 'loss', 'maintain'])->nullable();
             $table->integer('target_weight')->nullable();
+            
 
 
 
