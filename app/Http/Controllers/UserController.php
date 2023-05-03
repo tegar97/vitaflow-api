@@ -474,10 +474,22 @@ class UserController extends Controller
         $myMission->save();
 
 
-        return response()->json([
-            'message' => 'Success',
+        if($myMission->current >= $myMission->target){
+            return response()->json([
+                'message' => 'Success',
+                'data' => [
+                    'status' => true
+                ]
 
-        ], 200);
+            ], 200);
+        }else{
+            return response()->json([
+                'message' => 'Success',
+
+            ], 200);
+        }
+
+
     }
 
     // get drink history by date
