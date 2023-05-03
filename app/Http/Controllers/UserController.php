@@ -436,6 +436,7 @@ class UserController extends Controller
             ->whereDate('date', '=', date('Y-m-d'))
             ->sum('value');
 
+
         // add the new drink value to the total
         $totalDrinkValue += $request->drink_value;
 
@@ -443,7 +444,7 @@ class UserController extends Controller
         $myDrinkActivity = new MyDrinkActivity();
         $myDrinkActivity->user_id = $auth->id;
         $myDrinkActivity->my_mission_id = $myMission->id;
-        $myDrinkActivity->value = $request->drink_value;
+        $myDrinkActivity->value  = $totalDrinkValue;
         $myDrinkActivity->date = date('Y-m-d');
         $myDrinkActivity->save();
 
