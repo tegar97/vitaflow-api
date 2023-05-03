@@ -430,11 +430,20 @@ class UserController extends Controller
             return response()->json(['error' => 'MyMission not found'], 404);
         }
 
-        // store to my_drink_activity
+        // get the user's total drink value for today
+        $totalDrinkValue = MyDrinkActivity::where('user_id', $auth->id)
+            ->where('my_mission_id', $myMission->id)
+            ->whereDate('date', '=', date('Y-m-d'))
+            ->sum('value');
+
+        // add the new drink value to the total
+        $totalDrinkValue += $request->drink_value;
+
+        // store the new drink activity
         $myDrinkActivity = new MyDrinkActivity();
         $myDrinkActivity->user_id = $auth->id;
         $myDrinkActivity->my_mission_id = $myMission->id;
-        $myDrinkActivity->value = 1;
+        $myDrinkActivity->value = $request->drink_value;
         $myDrinkActivity->date = date('Y-m-d');
         $myDrinkActivity->save();
 
@@ -1022,10 +1031,11 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function getUserFoodTrackData(Request $request){
+    public function getUserFoodTrackData(Request $request)
+    {
         $date = $request->date; // tanggal yang diinput user
 
-        if($date == null){
+        if ($date == null) {
             $date = date('Y-m-d');
         }
         $auth = auth()->user(); // user yang sedang login
@@ -1073,12 +1083,5 @@ class UserController extends Controller
             ],
 
         ], 200);
-
-
-
-
     }
-
-
-
 }
