@@ -431,20 +431,16 @@ class UserController extends Controller
         }
 
         // get the user's total drink value for today
-        $totalDrinkValue = MyDrinkActivity::where('user_id', $auth->id)
-            ->where('my_mission_id', $myMission->id)
-            ->whereDate('date', '=', date('Y-m-d'))
-            ->first();
+
 
 
         // add the new drink value to the total
-        $totalDrinkValue->value += $request->drink_value;
 
         // store the new drink activity
         $myDrinkActivity = new MyDrinkActivity();
         $myDrinkActivity->user_id = $auth->id;
         $myDrinkActivity->my_mission_id = $myMission->id;
-        $myDrinkActivity->value  = $totalDrinkValue;
+        $myDrinkActivity->value  += 1;
 
         //date format YYYY-MM-DD HH:MM:SS
 
