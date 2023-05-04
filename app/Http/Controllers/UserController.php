@@ -436,11 +436,17 @@ class UserController extends Controller
 
         // add the new drink value to the total
 
+        $lastDrinkActivity = MyDrinkActivity::where('user_id', $auth->id)
+            ->where('my_mission_id', $myMission->id)
+            ->where('date', date('Y-m-d'))
+            ->orderBy('id', 'desc')
+            ->first();
+
         // store the new drink activity
         $myDrinkActivity = new MyDrinkActivity();
         $myDrinkActivity->user_id = $auth->id;
         $myDrinkActivity->my_mission_id = $myMission->id;
-        $myDrinkActivity->value  += 1;
+        $myDrinkActivity->value  = $lastDrinkActivity->value += 1;
 
         //date format YYYY-MM-DD HH:MM:SS
 
