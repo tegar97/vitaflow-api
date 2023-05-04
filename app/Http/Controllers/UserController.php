@@ -442,6 +442,9 @@ class UserController extends Controller
             ->orderBy('id', 'desc')
             ->first();
 
+            if($lastDrinkActivity->value == null  ){
+                $lastDrinkActivity->value = 0;
+            }
         // store the new drink activity
         $myDrinkActivity = new MyDrinkActivity();
         $myDrinkActivity->user_id = $auth->id;
