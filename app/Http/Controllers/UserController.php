@@ -505,17 +505,17 @@ class UserController extends Controller
     public function getUserDrinks(Request $request)
     {
         $auth = auth()->user();
-        $date = $request->input('date', date('Y-m-d'));
-        $days = $request->input('days', 7); // default to 7 days if not specified
+        $date = $request->date;
+        // $days = $request->input('days', 7); // default to 7 days if not specified
 
-        $endDate = date('Y-m-d', strtotime($date));
-        $startDate = date('Y-m-d', strtotime("-$days day", strtotime($endDate)));
+        // $endDate = date('Y-m-d', strtotime($date));
+        // $startDate = date('Y-m-d', strtotime("-$days day", strtotime($endDate)));
 
 
 
 
         $myDrinkActivities = MyDrinkActivity::where('user_id', $auth->id)
-            ->whereBetween('date', [$startDate, $endDate])->select('date', 'value')
+            ->where('date',$date)->select('date', 'value')
             ->select('date', 'value','created_at')
             ->get();
 
