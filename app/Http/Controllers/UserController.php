@@ -483,20 +483,11 @@ class UserController extends Controller
         $myMission->save();
 
 
-        if($myMission->current >= $myMission->target){
-            return response()->json([
-                'message' => 'Success',
-                'data' => [
-                    'status' => true
-                ]
+        return response()->json([
+            'message' => 'Success',
+            'data' =>  $myDrinkActivity
 
-            ], 200);
-        }else{
-            return response()->json([
-                'message' => 'Success',
-
-            ], 200);
-        }
+        ], 200);
 
 
     }
