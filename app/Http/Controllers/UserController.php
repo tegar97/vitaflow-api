@@ -485,7 +485,13 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Success',
-            'data' =>  $myDrinkActivity
+            'data' =>  [
+                'id' => $myDrinkActivity->id,
+                'value' => $myDrinkActivity->value,
+                'date' => $myDrinkActivity->date,
+                'created_at' => $myDrinkActivity->created_at,
+
+            ]
 
         ], 200);
 
