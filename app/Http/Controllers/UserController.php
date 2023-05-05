@@ -482,16 +482,16 @@ class UserController extends Controller
 
         $myMission->save();
 
+        $myDrinkList = MyDrinkActivity::where('user_id', $auth->id)
+            ->where('my_mission_id', $myMission->id)
+            ->where('date', date('Y-m-d'))
+            ->orderBy('id', 'desc')
+            ->get();
+
 
         return response()->json([
             'message' => 'Success',
-            'data' =>  [
-                'id' => $myDrinkActivity->id,
-                'value' => $myDrinkActivity->value,
-                'date' => $myDrinkActivity->date,
-                'created_at' => $myDrinkActivity->created_at,
-
-            ]
+            'data' =>  $myDrinkList
 
         ], 200);
 
