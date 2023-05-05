@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Program;
 use Illuminate\Http\Request;
 
 class ProgramControllerViews extends Controller

@@ -14,9 +14,32 @@ class ProductController extends Controller
         $categoryId = $request->input('category');
 
         $query = Product::query();
+        $query->select('products.*', 'categories.name AS category');
 
         if ($categoryId) {
             $query->where('category_id', $categoryId);
+        }
+
+        $query->leftJoin('categories', 'products.category_id', '=', 'categories.id');
+
+        $products = $query->get();
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $products
+        ], 200);
+    }
+
+
+    // search product
+    public function searchProduct(Request $request)
+    {
+        $search = $request->input('search');
+
+        $query = Product::query();
+
+        if ($search) {
+            $query->where('name', 'LIKE', "%{$search}%");
         }
 
         $products = $query->get();
@@ -26,6 +49,7 @@ class ProductController extends Controller
             'data' => $products
         ], 200);
     }
+
 
     public function getProductDetail($productId)
     {
