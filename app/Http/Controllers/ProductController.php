@@ -42,7 +42,7 @@ class ProductController extends Controller
 
         $query = Product::query();
 
-        $query->where('name', 'LIKE', "%{$search}%");
+        $query->where('products.name', 'ILIKE', "%{$search}%");
 
         // Add additional search parameters here using `orWhere()`
 
@@ -57,6 +57,7 @@ class ProductController extends Controller
             'data' => $products
         ], 200);
     }
+
 
 
     public function getProductDetail($productId)
