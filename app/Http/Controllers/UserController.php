@@ -516,7 +516,7 @@ class UserController extends Controller
 
         $myDrinkActivities = MyDrinkActivity::where('user_id', $auth->id)
             ->whereBetween('date', [$startDate, $endDate])->select('date', 'value')
-            ->select('date', 'value')
+            ->select('date', 'value','created_at')
             ->get();
 
 
