@@ -36,24 +36,21 @@ class ProductController extends Controller
     {
         $validatedData = $request->validate([
             'search' => 'required|string|min:1',
-            'category' => 'nullable|integer',
         ]);
 
         $search = $validatedData['search'];
-        $categoryId = $validatedData['category'];
 
         $query = Product::query();
-        $query->select('products.*', 'categories.name AS category');
 
-        $query->where('name', 'LIKE', "%{$search}%");
+        $query->where('name', 'ILIKE', "%{$search}%");
 
-        if ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }
+        // Add additional search parameters here using `orWhere()`
 
-        $query->leftJoin('categories', 'products.category_id', '=', 'categories.id');
+        $query->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+        ->select('products.id', 'products.name', 'products.description', 'products.price', 'categories.name as category')
+        ->paginate(10);
 
-        $products = $query->paginate(10);
+        $products = $query->appends(['search' => $search])->toArray();
 
         return response()->json([
             'message' => 'Success',
