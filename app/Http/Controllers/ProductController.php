@@ -34,15 +34,26 @@ class ProductController extends Controller
     // search product
     public function searchProduct(Request $request)
     {
-        $search = $request->input('search');
+        $validatedData = $request->validate([
+            'search' => 'required|string|min:1',
+            'category' => 'nullable|integer',
+        ]);
+
+        $search = $validatedData['search'];
+        $categoryId = $validatedData['category'];
 
         $query = Product::query();
+        $query->select('products.*', 'categories.name AS category');
 
-        if ($search) {
-            $query->where('name', 'LIKE', "%{$search}%");
+        $query->where('name', 'LIKE', "%{$search}%");
+
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
         }
 
-        $products = $query->get();
+        $query->leftJoin('categories', 'products.category_id', '=', 'categories.id');
+
+        $products = $query->paginate(10);
 
         return response()->json([
             'message' => 'Success',

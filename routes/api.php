@@ -38,7 +38,7 @@ Route::group([
     Route::get("categories", [CategoryController::class, 'getCategoryData']);
     Route::get('products', [ProductController::class, 'getProductByCategory']);
     Route::get('product/{productId}', [ProductController::class, 'getProductDetail']);
-    Route::get('product/search', [ProductController::class, 'searchProduct']);
+    Route::post('product/search', [ProductController::class, 'searchProduct']);
     Route::get('articles', [ArticleController::class, 'getArticleData']);
     Route::get('article/{articleId}', [ArticleController::class, 'getArticleDetail']);
 
