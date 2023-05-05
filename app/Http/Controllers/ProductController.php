@@ -42,21 +42,22 @@ class ProductController extends Controller
 
         $query = Product::query();
 
-        $query->where('products.name', 'LIKE', "%{$search}%");
+        $query->where('name', 'ILIKE', "%{$search}%");
 
         // Add additional search parameters here using `orWhere()`
 
-        $query->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+        $products = $query->leftJoin('categories', 'products.category_id', '=', 'categories.id')
         ->select('products.id', 'products.name', 'products.description', 'products.price', 'categories.name as category')
         ->paginate(10);
 
-        $products = $query->appends(['search' => $search])->toArray();
+        $products->appends(['search' => $search]);
 
         return response()->json([
             'message' => 'Success',
             'data' => $products
         ], 200);
     }
+
 
 
 
