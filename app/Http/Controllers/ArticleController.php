@@ -18,13 +18,17 @@ class ArticleController extends Controller
 
         foreach ($articles as $article) {
             $wordCount = str_word_count(strip_tags($article->content));
-            $readingTime = ceil($wordCount / 200); // assuming 200 words per minute reading speed
+            $readingTime = ceil($wordCount / 200);
+            $category = category_article::find($article->category_article_id); // get the related category
+            $categoryName = $category->name;
+            // assuming 200 words per minute reading speed
             $result[] = [
                 'id' => $article->id,
                 'name' => $article->name,
                 'image' => $article->image,
                 'content' => $article->content,
                 'category_id' => $article->category_article_id,
+                'category' => $categoryName,
                 'reading_time' => $readingTime // estimated reading time in minutes
             ];
         }
