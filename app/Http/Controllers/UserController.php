@@ -514,6 +514,7 @@ class UserController extends Controller
         $myDrinkActivities = MyDrinkActivity::where('user_id', $auth->id)
             ->where('date',$date)->select('date', 'value')
             ->select('date', 'value','created_at')
+            ->orderBy('date', 'asc')
             ->get();
 
 
