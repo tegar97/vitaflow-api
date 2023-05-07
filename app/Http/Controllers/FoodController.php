@@ -26,12 +26,18 @@ class FoodController extends Controller
             $defaultServing = $food->foodServingUnit->name;
             $defaultSize = $food->default_size;
             $calories = $food->food_calories * $defaultSize;
+            $carbs = $food->food_carbohydrate * $defaultSize;
+            $fat = $food->food_fat * $defaultSize;
+            $protein = $food->food_protein * $defaultSize;
 
             $result[] = [
                 'name' => $food->food_name,
                 'default_serving' => $defaultServing,
                 'default_size' => $defaultSize,
                 'calories' => $calories,
+                'carbs' => $carbs,
+                'fat' => $fat,
+                'protein' => $protein,
             ];
         }
 
