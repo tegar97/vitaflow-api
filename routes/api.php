@@ -45,6 +45,7 @@ Route::group([
 
     // food
     Route::get("foods", [FoodController::class, 'getFoodData']);
+    Route::get("food/search", [FoodController::class, 'searchFood']);
     // getFoodDetail
     Route::get("food/{foodId}", [FoodController::class, 'getFoodDetail']);
     Route::get('/food/{foodId}/unit', [FoodController::class, 'getFoodServingUnit']);

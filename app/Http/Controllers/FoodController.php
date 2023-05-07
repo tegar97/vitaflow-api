@@ -47,6 +47,42 @@ class FoodController extends Controller
         ], 200);
     }
 
+    public function searchFood(Request $request)
+    {
+        $search = $request->get('search');
+        $foods =  Food::with('foodServingUnit')
+        ->when($search, function ($query) use ($search) {
+            return $query->where('food_name', 'like', '%' . $search . '%');
+        })
+            ->get();
+
+        $result = [];
+
+        foreach ($foods as $food) {
+            $defaultServing = $food->foodServingUnit->name;
+            $defaultSize = $food->default_size;
+            $calories = $food->food_calories * $defaultSize;
+            $carbs = $food->food_carbohydrate * $defaultSize;
+            $fat = $food->food_fat * $defaultSize;
+            $protein = $food->food_protein * $defaultSize;
+
+            $result[] = [
+                'name' => $food->food_name,
+                'default_serving' => $defaultServing,
+                'default_size' => $defaultSize,
+                'calories' => $calories,
+                'carbs' => $carbs,
+                'fat' => $fat,
+                'protein' => $protein,
+            ];
+        }
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $result
+        ], 200);
+    }
+
     public function getFoodDataById($id)
     {
         $food =  Food::with('foodServingUnit')->find($id);
