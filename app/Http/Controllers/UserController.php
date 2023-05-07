@@ -1065,9 +1065,7 @@ class UserController extends Controller
             ->join('food', 'food_activity_trackings.food_id', '=', 'food.id')
             ->where('food_activity_trackings.user_id', $auth->id)
             ->where('food_activity_trackings.date', $date)
-            ->groupBy('meal_type', 'food.food_name', 'calorie_intake', 'carbohydrate_intake', 'protein_intake', 'fat_intake', 'size', 'unit')
-            ->get()
-            ->groupBy('meal_type');
+            ->get();
 
         // get my nutrion
         $myNutrion = MyNutrion::where('user_id', $auth->id)->where('date', $date)->first();
