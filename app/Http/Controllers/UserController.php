@@ -1072,26 +1072,28 @@ class UserController extends Controller
         // get my nutrion
         $myNutrion = MyNutrion::where('user_id', $auth->id)->where('date', $date)->first();
 
+        $carboProteinFatSum = $myNutrion->carbohydrate + $myNutrion->protein + $myNutrion->fat;
+        $carboPercent = $proteinPercent = $fatPercent = 0;
+        if ($carboProteinFatSum > 0) {
+            $carboPercent = ($myNutrion->carbohydrate / $carboProteinFatSum) * 100;
+            $proteinPercent = ($myNutrion->protein / $carboProteinFatSum) * 100;
+            $fatPercent = ($myNutrion->fat / $carboProteinFatSum) * 100;
+        }
+
         $nutrion = [
-            'calorieLeft' => $myNutrion->calorieLeft,
-            'carbohydrate' => $myNutrion->carbohydrate,
-            'protein' => $myNutrion->protein,
-            'fat' => $myNutrion->fat,
-            'intakeCalories' => $myNutrion->intakeCalories,
-            'targetCalories' => $myNutrion->targetCalories,
+                'calorieLeft' => $myNutrion->calorieLeft,
+                'carbohydrate' => $myNutrion->carbohydrate,
+                'protein' => $myNutrion->protein,
+                'fat' => $myNutrion->fat,
+                'intakeCalories' => $myNutrion->intakeCalories,
+                'targetCalories' => $myNutrion->targetCalories,
+                'calorieLeftPercentage' => ($myNutrion->calorieLeft / $myNutrion->targetCalories) * 100,
+                'intakeCaloriesPercentage' => ($myNutrion->intakeCalories / $myNutrion->targetCalories) * 100,
+                'carbohydratePercentage' => $carboPercent,
+                'proteinPercentage' => $proteinPercent,
+                'fatPercentage' => $fatPercent,
+            ];
 
-            //percentange calori with targetCalorie
-            'calorieLeftPercentage' => ($myNutrion->calorieLeft / $myNutrion->targetCalories) * 100,
-            'intakeCaloriesPercentage' => ($myNutrion->intakeCalories / $myNutrion->targetCalories) * 100,
-
-            // percetange carbo , protein , fat  (carbo+ protein + fat = 100%)
-
-            'carbohydratePercentage' => ($myNutrion->carbohydrate / ($myNutrion->carbohydrate + $myNutrion->protein + $myNutrion->fat)) * 100,
-            'proteinPercentage' => ($myNutrion->protein / ($myNutrion->carbohydrate + $myNutrion->protein + $myNutrion->fat)) * 100,
-            'fatPercentage' => ($myNutrion->fat / ($myNutrion->carbohydrate + $myNutrion->protein + $myNutrion->fat)) * 100,
-
-
-        ];
 
 
         return response()->json([
