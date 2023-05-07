@@ -35,7 +35,10 @@ class FoodController extends Controller
             ];
         }
 
-        return $result;
+        return response()->json([
+            'message' => 'Success',
+            'data' => $result
+        ], 200);
     }
 
     public function getFoodDataById($id)
