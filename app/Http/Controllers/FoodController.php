@@ -25,10 +25,10 @@ class FoodController extends Controller
         foreach ($foods as $food) {
             $defaultServing = $food->foodServingUnit->name;
             $defaultSize = $food->default_size;
-            $calories = $food->food_calories * $food->foodServingUnit->serving_size;
-            $carbs = $food->food_carbohydrate * $food->foodServingUnit->serving_size;
-            $fat = $food->food_fat * $food->foodServingUnit->serving_size;
-            $protein = $food->food_protein * $food->foodServingUnit->serving_size;
+            $calories = $food->food_calories * $food->foodServingUnit->serving_size * $defaultSize;
+            $carbs = $food->food_carbohydrate * $food->foodServingUnit->serving_size * $defaultSize;
+            $fat = $food->food_fat * $food->foodServingUnit->serving_size * $defaultSize;
+            $protein = $food->food_protein * $food->foodServingUnit->serving_size * $defaultSize;
 
             $result[] = [
                 'id' => $food->id, // tambah id untuk nanti di klik ke detail food
@@ -63,10 +63,10 @@ class FoodController extends Controller
         foreach ($foods as $food) {
             $defaultServing = $food->foodServingUnit->name;
             $defaultSize = $food->default_size;
-            $calories = $food->food_calories * $food->foodServingUnit->serving_size;
-            $carbs = $food->food_carbohydrate * $food->foodServingUnit->serving_size;
-            $fat = $food->food_fat * $food->foodServingUnit->serving_size;
-            $protein = $food->food_protein * $food->foodServingUnit->serving_size;
+            $calories = $food->food_calories * $food->foodServingUnit->serving_size * $defaultSize;
+            $carbs = $food->food_carbohydrate * $food->foodServingUnit->serving_size * $defaultSize;
+            $fat = $food->food_fat * $food->foodServingUnit->serving_size * $defaultSize;
+            $protein = $food->food_protein * $food->foodServingUnit->serving_size * $defaultSize;
 
             $result[] = [
                 'id' => $food->id, // tambah id untuk nanti di klik ke detail food
