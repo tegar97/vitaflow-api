@@ -67,6 +67,7 @@ class FoodController extends Controller
             $protein = $food->food_protein * $defaultSize;
 
             $result[] = [
+                'id' => $food->id, // tambah id untuk nanti di klik ke detail food
                 'name' => $food->food_name,
                 'default_serving' => $defaultServing,
                 'default_size' => $defaultSize,
