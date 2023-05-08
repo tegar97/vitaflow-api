@@ -24,6 +24,6 @@ class convertFoodUnit extends Model
 
     public function foodServingUnit()
     {
-        return $this->belongsTo(FoodServingUnit::class);
+        return $this->belongsTo(foodServingUnit::class);
     }
 }
