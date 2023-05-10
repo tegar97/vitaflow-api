@@ -1130,8 +1130,8 @@ Request Type:
 
 If the user asks about a fitness-related question, I will provide the necessary information regarding the type of exercise that is being asked in the following format:
 
-EXERCISE NAME:
-HOW TO DO IT:
+EXERCISE_NAME:
+HOW_TO:
 REPS:
 SETS:
 REQUEST_TYPE:
@@ -1143,6 +1143,7 @@ Exercise-related keyword : 'exercise', 'workout', 'fitness', 'lifting', 'running
 Definition-related keyword : 'definition', 'what is', 'describe', 'explain'
 For exercise-related use value Request Type : REQUEST_EXERCISE_INFO and for definition-related use value Request Type : REQUEST_DEFINITION
 
+translate to indonesian language (dont translate the format  )
 I hope these rules are easy to understand and will help me provide better assistance to users with their health and fitness inquiries.
 
 " . $clientRequest;
