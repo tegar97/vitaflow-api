@@ -1149,17 +1149,18 @@ class UserController extends Controller
 
 
 
-    $response = Http::post(env('VITA_BOT'), [
-                "model" => "gpt-3.5-turbo",
-
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OPENAI_API_KEY')
+        ])->post(env('OPENAI_URL'), [
+            "model" => "gpt-3.5-turbo",
             'messages' => [
                 [
                     "role" => "user",
                     "content" => $message
-
                 ]
             ]
         ]);
+
 
         $text = $response->getBody()->getContents();
 
