@@ -1169,7 +1169,7 @@ I hope these rules are easy to understand and will help me provide better assist
 
         $message_content =
         $text['choices'][0]['message']['content'];
-        $roles = $text['choices'][0]['message']['roles'];
+        $role = $text['choices'][0]['message']['role'];
 
 
 
@@ -1179,7 +1179,7 @@ I hope these rules are easy to understand and will help me provide better assist
             'message' => 'Success',
             'data' => [
                 'message' => $message_content,
-                'roles' => $roles,
+                'role' => $role,
 
             ],
         ], 200);
