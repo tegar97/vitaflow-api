@@ -1167,11 +1167,21 @@ I hope these rules are easy to understand and will help me provide better assist
 
         $text = json_decode($text, true);
 
-        $message_content = $text['choices'][0]['message']['content'];
+        $message_content =
+        $text['choices'][0]['message']['content'];
+        $roles = $text['choices'][0]['message']['roles'];
+
+
+
+
 
         return response()->json([
             'message' => 'Success',
-            'data' => $message_content,
+            'data' => [
+                'message' => $message_content,
+                'roles' => $roles,
+
+            ],
         ], 200);
 
 
