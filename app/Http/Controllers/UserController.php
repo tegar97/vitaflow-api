@@ -18,6 +18,7 @@ use App\Models\sportTrackingActivity;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -494,8 +495,6 @@ class UserController extends Controller
             'data' =>  $myDrinkList
 
         ], 200);
-
-
     }
 
     // get drink history by date
@@ -512,8 +511,8 @@ class UserController extends Controller
 
 
         $myDrinkActivities = MyDrinkActivity::where('user_id', $auth->id)
-            ->where('date',$date)->select('date', 'value')
-            ->select('date', 'value','created_at')
+            ->where('date', $date)->select('date', 'value')
+            ->select('date', 'value', 'created_at')
             ->orderBy('value', 'desc')
             ->get();
 
@@ -1079,18 +1078,18 @@ class UserController extends Controller
         }
 
         $nutrion = [
-                'calorieLeft' => $myNutrion->calorieLeft,
-                'carbohydrate' => $myNutrion->carbohydrate,
-                'protein' => $myNutrion->protein,
-                'fat' => $myNutrion->fat,
-                'intakeCalories' => $myNutrion->intakeCalories,
-                'targetCalories' => $myNutrion->targetCalories,
-                'calorieLeftPercentage' => ($myNutrion->calorieLeft / $myNutrion->targetCalories) * 100,
-                'intakeCaloriesPercentage' => ($myNutrion->intakeCalories / $myNutrion->targetCalories) * 100,
-                'carbohydratePercentage' => $carboPercent,
-                'proteinPercentage' => $proteinPercent,
-                'fatPercentage' => $fatPercent,
-            ];
+            'calorieLeft' => $myNutrion->calorieLeft,
+            'carbohydrate' => $myNutrion->carbohydrate,
+            'protein' => $myNutrion->protein,
+            'fat' => $myNutrion->fat,
+            'intakeCalories' => $myNutrion->intakeCalories,
+            'targetCalories' => $myNutrion->targetCalories,
+            'calorieLeftPercentage' => ($myNutrion->calorieLeft / $myNutrion->targetCalories) * 100,
+            'intakeCaloriesPercentage' => ($myNutrion->intakeCalories / $myNutrion->targetCalories) * 100,
+            'carbohydratePercentage' => $carboPercent,
+            'proteinPercentage' => $proteinPercent,
+            'fatPercentage' => $fatPercent,
+        ];
 
 
 
@@ -1102,6 +1101,74 @@ class UserController extends Controller
 
             ],
 
+        ], 200);
+    }
+
+    public function vitabot(Request $request)
+    {
+
+        // Ambil inputan teks dari request
+
+        $clientRequest = $request->input('text');
+        $message =
+            "If the user greets me, I will respond by saying 'I am Chef AI, ready to help you find the recipe you need.' and only mention their greeting.
+
+        If the user is talking about recipes, I will only provide responses about recipes and will not provide information about products.
+
+        If the user is talking about products, I will only provide responses about products and will not provide information about recipes.
+
+        I will limit my responses according to the topic being discussed by the user and will not mix up the topics.
+
+        For recipe-related inquiries, I will provide directions in numbered points for easy understanding.
+
+        Example Recipe:
+        Name:
+        Ingredients:
+        Request type:
+        Directions:
+
+
+        If the user asks about a product not recipe, I will answer with the definition and benefits of the requested product in the following format:
+        Topic:
+        Definition:
+        Request type:
+        Directions:
+
+
+
+        For Recipe-related Reqeust type : REQUEST_RECIPE_INFO
+        For Product-related Request type : REQUEST_PRODUCT_INFO
+        Recipe-related keyword :  'recipe', 'recipes', 'cooking', 'cook', 'cooking' and related words
+        Product-related keyword : 'product', 'products', 'grocery', 'groceries', 'grocery product','what is ,
+        For recipe-lated use value Request type : REQUEST_RECIPE_INFO and for product-related (product definition)  use value Request type : REQUEST_PRODUCT_INFO
+        I hope these rules are easy to understand and will help me provide better assistance to users with their recipe and grocery product inquiries.
+
+
+" . $clientRequest;
+
+
+
+
+    $response = Http::post(env('VITA_BOT'), [
+                "model" => "gpt-3.5-turbo",
+
+            'messages' => [
+                [
+                    "role" => "user",
+                    "content" => $message
+
+                ]
+            ]
+        ]);
+
+        $text = $response->getBody()->getContents();
+
+
+        $text = json_decode($text, true);
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $text['messages'][0]['content'],
         ], 200);
     }
 }

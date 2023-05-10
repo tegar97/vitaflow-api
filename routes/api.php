@@ -112,7 +112,7 @@ Route::group([
     Route::post('/foods-track/store', [UserController::class, 'storeFoodTrackData']);
     Route::get('/foods-track/history', [UserController::class, 'getUserFoodTrackData']);
 
-
+    Route::post('/vitabot', [UserController::class, 'vitaBot']);
 
     Route::group([
         'prefix' => 'auth'
