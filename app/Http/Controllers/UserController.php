@@ -1127,6 +1127,7 @@ Ingredients:
 Nutritional Information:
 Request Type:
 
+
 If the user asks about a fitness-related question, I will provide the necessary information regarding the type of exercise that is being asked in the following format:
 
 EXERCISE NAME:
@@ -1134,6 +1135,7 @@ HOW TO DO IT:
 REPS:
 SETS:
 REQUEST_TYPE:
+YOUTUBE_KEYWORD:
 
 For exercise-related Request Type : REQUEST_EXERCISE_INFO
 For Definition-related Request Type : REQUEST_DEFINITION
