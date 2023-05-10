@@ -1161,15 +1161,18 @@ class UserController extends Controller
             ]
         ]);
 
-
         $text = $response->getBody()->getContents();
-
 
         $text = json_decode($text, true);
 
+        $message_content = $text['choices'][0]['message']['content'];
+
         return response()->json([
             'message' => 'Success',
-            'data' => $text['messages'][0]['content'],
+            'data' => $message_content,
         ], 200);
+
+
+
     }
 }
