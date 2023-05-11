@@ -559,12 +559,12 @@ class UserController extends Controller
         }
 
         // store to my_drink_activity
-        $myDrinkActivity = new MyWeightTrackActivity();
-        $myDrinkActivity->user_id = $auth->id;
-        $myDrinkActivity->my_mission_id = $myMission->id;
-        $myDrinkActivity->value = $request->weight;
-        $myDrinkActivity->date = date('Y-m-d');
-        $myDrinkActivity->save();
+        $myWeighTrackData = new MyWeightTrackActivity();
+        $myWeighTrackData->user_id = $auth->id;
+        $myWeighTrackData->my_mission_id = $myMission->id;
+        $myWeighTrackData->value = $request->weight;
+        $myWeighTrackData->date = date('Y-m-d');
+        $myWeighTrackData->save();
 
 
 
@@ -594,6 +594,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Success',
+            'data' =>  $myWeighTrackData
 
         ], 200);
     }
@@ -608,7 +609,7 @@ class UserController extends Controller
         $startDate = date('Y-m-d', strtotime("-$days day", strtotime($endDate)));
 
         $myWeightTrack = MyWeightTrackActivity::where('user_id', $auth->id)
-            ->whereBetween('date', [$startDate, $endDate])->select('date', 'value')
+            ->whereBetween('date', [$startDate, $endDate])->select('date', 'value', 'created_at')
             ->get();
 
         return response()->json([
