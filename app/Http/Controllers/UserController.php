@@ -591,6 +591,12 @@ class UserController extends Controller
 
         $myMission->save();
 
+        $myWeighTrackData = MyWeightTrackActivity::where('user_id', $auth->id)
+            ->where('my_mission_id', $myMission->id)
+            ->where('date', date('Y-m-d'))
+            ->orderBy('id', 'desc')
+            ->first();
+
 
         return response()->json([
             'message' => 'Success',
