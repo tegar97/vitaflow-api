@@ -750,6 +750,13 @@ class UserController extends Controller
         $myHealthTrack->date = date('Y-m-d');
         $myHealthTrack->save();
 
+        $myHealthTrack =
+        HealthTrackActivity::where('user_id', $auth->id)
+            ->where('date', Date("Y-m-d"))
+            ->select('date', 'value', 'created_at')
+            ->orderBy('value', 'desc')
+            ->get();
+
 
 
 
@@ -777,6 +784,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Success',
+            'data'
 
         ], 200);
     }
@@ -803,7 +811,7 @@ class UserController extends Controller
             $bpm = $activity->value;
             $healthData[] = [
                 'date' => $activity->date,
-                'bpm' => $bpm
+                'value' => $bpm
             ];
             $totalBpm += $bpm;
         }
@@ -813,9 +821,12 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Success',
-            'data' => $healthActivities,
-            'chart ' => $healthData,
-            'average_bpm' => $avgBpm
+            'data' => [
+                'health_data' => $healthActivities,
+                'chart' => $healthData,
+                'average_bpm' => $avgBpm
+
+            ],
         ], 200);
     }
 
