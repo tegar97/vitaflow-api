@@ -595,7 +595,7 @@ class UserController extends Controller
             ->where('my_mission_id', $myMission->id)
             ->where('date', date('Y-m-d'))
             ->orderBy('id', 'desc')
-            ->first();
+            ->get();
 
 
         return response()->json([
