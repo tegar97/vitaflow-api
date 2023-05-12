@@ -116,6 +116,8 @@ Route::group([
     Route::post('/premium/trial', [UserController::class, 'activateTrialPremium']);
     Route::post('/premium/pay/bca', [UserController::class, 'activePremiumBca']);
     Route::post('/webhook', [UserController::class, 'webHookHandler']);
+    Route::post('/verify', [UserController::class, 'paymentValidation']);
+
 
 
 

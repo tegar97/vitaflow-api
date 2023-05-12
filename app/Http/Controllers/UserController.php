@@ -1461,5 +1461,22 @@ I hope these rules are easy to understand and will help me provide better assist
 
     }
 
+    // validasi pembayaran
+
+    public function paymentValidation( Request $request) {
+
+       $payment = ModelsPayment::where('payment_url', $request->transaction_id)->first();
+
+
+        return response()->json([
+            'message' => 'Success',
+            'data' =>  $payment
+        ], 200);
+
+
+
+
+    }
+
 
 }
