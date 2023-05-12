@@ -1323,9 +1323,24 @@ I hope these rules are easy to understand and will help me provide better assist
             'snap_url' => '-',
             'service_name' => "bca",
         ]);
+
+
+
+
         return response()->json([
             'message' => 'Success',
-            'data' => $response
+            'data' => [
+                'gross_amount' => $response->gross_amount,
+                'transaction_id' => $response->transaction_id,
+                'payment_type' => $response->payment_type,
+                'bank' => $response->va_numbers[0]->bank,
+                'va_number' => $response->va_numbers[0]->va_number,
+                'expire_time_unix' => $expire,
+                'expire_time_str' => $dateString,
+                'service_name' => "bca",
+
+
+            ]
         ], 200);
 
     }
