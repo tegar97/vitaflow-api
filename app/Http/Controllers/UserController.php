@@ -1479,6 +1479,7 @@ I hope these rules are easy to understand and will help me provide better assist
                 "expire_time_unix" => $payment->expire_time_unix,
                 "expire_time_str" => $payment->expire_time_str,
                 "service_name" => $payment->service_name,
+                "payment_status" => $payment->payment_status,
 
             ]
         ], 200);
