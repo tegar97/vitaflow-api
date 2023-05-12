@@ -113,6 +113,12 @@ Route::group([
     Route::get('/foods-track/history', [UserController::class, 'getUserFoodTrackData']);
 
     Route::post('/vitabot', [UserController::class, 'vitaBot']);
+    Route::post('/premium/trial', [UserController::class, 'activateTrialPremium']);
+    Route::post('/premium/pay/bca', [UserController::class, 'activePremiumBca']);
+    Route::post('/webhook', [UserController::class, 'webHookHandler']);
+
+
+
 
     Route::group([
         'prefix' => 'auth'

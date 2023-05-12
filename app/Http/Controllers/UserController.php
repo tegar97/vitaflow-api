@@ -13,9 +13,12 @@ use App\Models\MyNutrion;
 use App\Models\MyProgram;
 use App\Models\MyRunningActivity;
 use App\Models\MyWeightTrackActivity;
+use App\Models\payment as ModelsPayment;
 use App\Models\Program;
 use App\Models\sportTrackingActivity;
 use App\Models\User;
+use Carbon\Carbon;
+use Faker\Provider\ar_EG\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -1205,4 +1208,243 @@ I hope these rules are easy to understand and will help me provide better assist
 
 
     }
+
+    public function activateTrialPremium()
+    {
+        $auth = auth()->user();
+
+        $user = User::find($auth->id);
+
+
+        if (!$user->is_premium) { // Jika user belum premium
+            $user->is_premium = true; // Aktifkan premium
+            $user->premium_expires_at = Carbon::now()->addDays(7); // Berikan durasi trial 7 hari
+            $user->save(); // Simpan perubahan
+
+            return response()->json(['message' => 'Trial premium activated successfully.'], 200);
+        }
+
+        return response()->json(['message' => 'User is already premium.'], 400);
+    }
+
+    public function activePremiumBca(Request $request){
+
+        \Midtrans\Config::$clientKey = env('MIDTRANS_CLIENT_KEY');
+        \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+        \Midtrans\Config::$isProduction = (bool) env('MIDTRANS_ISPRODUCTION');
+        \Midtrans\Config::$is3ds = (bool) env('IS3DS');
+
+
+        $auth = auth()->user();
+
+        $user = User::find($auth->id);
+
+
+        $plan_type = $request->plan_type;
+
+        if($plan_type == 'monthly'){
+            $transaction_details = array(
+                'order_id'    => time(),
+                'gross_amount'  => 30000
+            );; // Simpan perubahan
+
+            $items = array(
+                array(
+                    'id'       => 'vita_premium_monthly',
+                    'price'    => 30000,
+                    'quantity' => 1,
+                    'name'     => 'Vita premium 1 month'
+                ),
+
+            );
+
+        }else{
+            $transaction_details = array(
+                'order_id'    => time(),
+                'gross_amount'  => 299999
+            );; // Simpan perubahan
+
+            $items = array(
+                array(
+                    'id'       => 'vita_premium_yearly',
+                    'price'    => 299999,
+                    'quantity' => 1,
+                    'name'     => 'Vita premium 1 year'
+                ),
+
+            );
+            // Simpan perubahan
+        }
+
+
+        $name = explode(' ', $user['name']);
+        if (count($name) > 1) {
+            $customer_details = array(
+                'first_name'       => $name[0],
+                'last_name'        => $name[1],
+                'email'            => $user['email'],
+                'phone'            => "08214124",
+
+            );
+        } else {
+            $customer_details = array(
+                'first_name'       => $name[0],
+                'email'            => $user['email'],
+                'phone'            => "08124124",
+
+            );
+        }
+
+        $transaction = array(
+            'transaction_details' => $transaction_details,
+            'customer_details' => $customer_details,
+            'item_details' => $items,
+            'payment_type' => 'bank_transfer',
+            'bank_transfer' => array(
+                'bank' => 'bca',
+
+            )
+        );
+
+
+
+
+        $response = \Midtrans\CoreApi::charge($transaction);
+        $expire = Carbon::now('Asia/Jakarta')->addDays(1)->timestamp;
+        $dateString = Carbon::now('Asia/Jakarta')->addDays(1);
+        ModelsPayment::create([
+            'user_id' => $user['id'],
+            'midtrans_order_id' => $response->order_id,
+            'amount' => $response->gross_amount,
+            'payment_url' => $response->transaction_id,
+            'expire_time_unix' => $expire,
+            'expire_time_str' => $dateString,
+            'payment_status' => 2,
+            'snap_url' => '-',
+            'service_name' => "bca",
+        ]);
+        return response()->json([
+            'message' => 'Success',
+            'data' => $response
+        ], 200);
+
+    }
+
+    public function webHookHandler(Request $request)
+    {
+        $data = $request->all();
+
+        $signatureKey = $data['signature_key'];
+        $orderId = $data['order_id'];
+        $statusCode = $data['status_code'];
+        $grossAmount = $data['gross_amount'];
+        $serverKey = env('MIDTRANS_SERVER_KEY');
+
+
+        $mySignatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+
+        $transactioStatus = $data['transaction_status'];
+        $type = $data['payment_type'];
+        $fraudStatus = $data['fraud_status'];
+        if ($signatureKey !== $mySignatureKey) {
+            return  response()->json([
+                'message' => 'Invalid signature',
+                'data' => $data
+            ], 400);
+        };
+        $payment = ModelsPayment::where('midtrans_order_id', $orderId)->first();
+
+        if (!$payment) {
+            return  response()->json([
+                'message' => 'Payment not found',
+                'data' => $data
+            ], 400);
+        }
+
+
+        if ($payment->payment_status === 1) {
+            return response()->json([
+                'message' => 'Payment already processed',
+                'data' => $data
+            ], 400);
+        }
+
+        if ($transactioStatus == 'capture') {
+            if ($fraudStatus == 'challenge') {
+                // TODO set transaction status on your database to 'challenge'
+                $payment->payment_status = 3;
+                $payment->payment_status_str = 'challenge';
+
+                // and response with 200 OK
+            } else if ($fraudStatus == 'accept') {
+                // TODO set transaction status on your database to 'success'
+                // and response with 200 OK
+                $payment->payment_status = 1;
+                $payment->payment_status_str = 'settlement';
+            }
+        } else if ($transactioStatus == 'settlement') {
+            // TODO set transaction status on your database to 'success'
+
+            $buyers = User::where('id', $payment->user_id)->first();
+
+            if($grossAmount == 30000) {
+                $buyers->update([
+                    'is_premium' => 1,
+                    'expired_premium' => Carbon::now()->addDays(30)
+                ]);
+            }else{
+                $buyers->update([
+                    'is_premium' => 1,
+                    'premium_expires_at' => Carbon::now()->addDays(365)
+                ]);
+            }
+
+            $payment->payment_status = 1;
+            $payment->payment_status_str = 'settlement';
+
+
+
+            // and response with 200 OK
+        } else if (
+            $transactioStatus == 'cancel' ||
+            $transactioStatus == 'deny' ||
+            $transactioStatus == 'expire'
+        ) {
+            // TODO set transaction status on your database to 'failure'
+            $payment->payment_status = 3;
+            $payment->payment_status_str = 'cancel';
+
+
+
+
+
+
+            // and response with 200 OK
+        } else if ($transactioStatus == 'pending') {
+            // TODO set transaction status on your database to 'pending' / waiting payment
+            $payment->payment_status = 2;
+            $payment->payment_status_str = 'pending';
+
+            // foreach ($order as $o) {
+            //     $value = $order['amount'] + $order['shipping_amount'];
+            //     $email = $user
+
+            //     foreach ($o['orderItem'] as $item) {
+
+            //     }
+            // };
+
+
+
+            // and response with 200 OK
+        }
+
+        $payment->save();
+
+
+
+
+    }
+
+
 }
