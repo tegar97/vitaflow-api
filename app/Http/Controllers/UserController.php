@@ -1330,7 +1330,7 @@ I hope these rules are easy to understand and will help me provide better assist
         return response()->json([
             'message' => 'Success',
             'data' => [
-                'gross_amount' => $response->gross_amount,
+                'gross_amount' => intval($response->gross_amount),
                 'transaction_id' => $response->transaction_id,
                 'payment_type' => $response->payment_type,
                 'bank' => $response->va_numbers[0]->bank,
