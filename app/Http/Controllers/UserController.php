@@ -1470,7 +1470,17 @@ I hope these rules are easy to understand and will help me provide better assist
 
         return response()->json([
             'message' => 'Success',
-            'data' =>  $payment
+            'data' =>  [
+                "gross_amount" => $payment->amount,
+                "transaction_id" => $payment->payment_url,
+                "payment_type" => $payment->payment_type,
+                "bank" => $payment->service_name,
+                "va_number" => $payment->payment_url,
+                "expire_time_unix" => $payment->expire_time_unix,
+                "expire_time_str" => $payment->expire_time_str,
+                "service_name" => $payment->service_name,
+
+            ]
         ], 200);
 
 
