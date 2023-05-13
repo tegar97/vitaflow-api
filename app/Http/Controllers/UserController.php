@@ -1198,7 +1198,7 @@ I hope these rules are easy to understand and will help me provide better assist
         $role = $text['choices'][0]['message']['role'];
 
 
-        $user->credit = $user->credit - 100;
+        $user->credits = $user->credits - 100;
         $user->save();
 
 
@@ -1227,7 +1227,7 @@ I hope these rules are easy to understand and will help me provide better assist
 
         if (!$user->is_premium) { // Jika user belum premium
             $user->is_premium = true; // Aktifkan premium
-            $user->credit = 9999999;
+            $user->credits = 9999999;
             $user->premium_expires_at = Carbon::now()->addDays(7); // Berikan durasi trial 7 hari
             $user->save(); // Simpan perubahan
 
@@ -1415,13 +1415,13 @@ I hope these rules are easy to understand and will help me provide better assist
             if($grossAmount == 30000) {
                 $buyers->update([
                     'is_premium' => 1,
-                    'credit' => 9999999,
+                    'credits' => 9999999,
                     'expired_premium' => Carbon::now()->addDays(30)
                 ]);
             }else{
                 $buyers->update([
                     'is_premium' => 1,
-                    'credit' => 9999999,
+                    'credits' => 9999999,
                     'premium_expires_at' => Carbon::now()->addDays(365)
                 ]);
             }
