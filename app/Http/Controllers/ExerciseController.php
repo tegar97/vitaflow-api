@@ -15,7 +15,7 @@ class ExerciseController extends Controller
         $exerciseType = exerciseType::all();
 
         return response()->json([
-            'status' => 'success',
+            'message' => 'Success',
             'data' => $exerciseType
         ]);
     }
@@ -24,7 +24,7 @@ class ExerciseController extends Controller
     {
         $exerciseType = exerciseType::where('exercise_name', 'like', '%' . $request->search . '%')->get();
         return response()->json([
-            'status' => 'success',
+            'message' => 'Success',
             'data' => $exerciseType
         ]);
     }
