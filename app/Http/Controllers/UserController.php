@@ -106,7 +106,7 @@ class UserController extends Controller
         $myProgram->user_id = $auth->id;
         $myProgram->program_id = $programs->id;
         $myProgram->status = 'on-going';
-        $myProgram->join_date = date('Y-m-d');
+        $myProgram->join_date =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
         $myProgram->end_date = date('Y-m-d', strtotime('+14 days'));
 
         $myProgram->save();
@@ -119,7 +119,7 @@ class UserController extends Controller
         $missions = Mission::where('program_id', $program->id)->get();
 
         // generate my_mission
-        $startDate = date('Y-m-d');
+        $startDate =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
         $endDate = date('Y-m-d', strtotime('+14 days'));
         $currentDate = $startDate;
 
@@ -441,7 +441,7 @@ class UserController extends Controller
         // add the new drink value to the total
         $lastDrinkActivity = MyDrinkActivity::where('user_id', $auth->id)
             ->where('my_mission_id', $myMission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->orderBy('id', 'desc')
             ->first();
 
@@ -488,7 +488,7 @@ class UserController extends Controller
 
         $myDrinkList = MyDrinkActivity::where('user_id', $auth->id)
             ->where('my_mission_id', $myMission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->orderBy('id', 'desc')
             ->get();
 
@@ -554,7 +554,7 @@ class UserController extends Controller
 
         $myMission = MyMission::where('user_id', $auth->id)
             ->where('mission_id', $mission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->first();
 
         if (!$myMission) {
@@ -566,7 +566,7 @@ class UserController extends Controller
         $myWeighTrackData->user_id = $auth->id;
         $myWeighTrackData->my_mission_id = $myMission->id;
         $myWeighTrackData->value = $request->weight;
-        $myWeighTrackData->date = date('Y-m-d');
+        $myWeighTrackData->date =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
         $myWeighTrackData->save();
 
 
@@ -596,7 +596,7 @@ class UserController extends Controller
 
         $myWeighTrackData = MyWeightTrackActivity::where('user_id', $auth->id)
             ->where('my_mission_id', $myMission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->orderBy('id', 'desc')
             ->get();
 
@@ -611,7 +611,7 @@ class UserController extends Controller
     public function getUserWeightTrackData(Request $request)
     {
         $auth = auth()->user();
-        $date = $request->input('date', date('Y-m-d'));
+        $date = $request->input('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString());
         $days = $request->input('days', 7); // default to 7 days if not specified
 
         $endDate = date('Y-m-d', strtotime($date));
@@ -653,7 +653,7 @@ class UserController extends Controller
 
         $myMission = MyMission::where('user_id', $auth->id)
             ->where('mission_id', $mission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->first();
 
         if (!$myMission) {
@@ -665,7 +665,7 @@ class UserController extends Controller
         $myRunningActivity->user_id = $auth->id;
         $myRunningActivity->my_mission_id = $myMission->id;
         $myRunningActivity->value = $request->step;
-        $myRunningActivity->date = date('Y-m-d');
+        $myRunningActivity->date =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
         $myRunningActivity->save();
 
 
@@ -703,7 +703,7 @@ class UserController extends Controller
     public function getUserStepTrackData(Request $request)
     {
         $auth = auth()->user();
-        $date = $request->input('date', date('Y-m-d'));
+        $date = $request->input('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString());
         $days = $request->input('days', 7); // default to 7 days if not specified
 
         $endDate = date('Y-m-d', strtotime($date));
@@ -743,7 +743,7 @@ class UserController extends Controller
 
         $myMission = MyMission::where('user_id', $auth->id)
             ->where('mission_id', $mission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->first();
 
 
@@ -757,7 +757,7 @@ class UserController extends Controller
         $myHealthTrack->user_id = $auth->id;
         $myHealthTrack->my_mission_id = $myMission->id;
         $myHealthTrack->value = $request->bpm;
-        $myHealthTrack->date = date('Y-m-d');
+        $myHealthTrack->date =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
         $myHealthTrack->save();
 
         $myHealthTrack =
@@ -802,7 +802,7 @@ class UserController extends Controller
     public function getUserHealthTrackData(Request $request)
     {
         $auth = auth()->user();
-        $date = $request->input('date', date('Y-m-d'));
+        $date = $request->input('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString());
         $days = $request->input('days', 7); // default to 7 days if not specified
 
         $endDate = date('Y-m-d', strtotime($date));
@@ -862,7 +862,7 @@ class UserController extends Controller
 
         $myMission = MyMission::where('user_id', $auth->id)
             ->where('mission_id', $mission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->first();
 
         if (!$myMission) {
@@ -887,7 +887,7 @@ class UserController extends Controller
             $myExerciseTrack->exercise_type_id = $exercise_id;
             $myExerciseTrack->duration = $duration;
             $myExerciseTrack->burn_calories = $burnedCalories;
-            $myExerciseTrack->date = date('Y-m-d');
+            $myExerciseTrack->date =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
             $myExerciseTrack->save();
         }
 
@@ -895,7 +895,7 @@ class UserController extends Controller
 
         // add to mynutrion activityCalori
 
-        $userNutrion = MyNutrion::where('user_id', $auth->id)->where('date', date('Y-m-d'))->first();
+        $userNutrion = MyNutrion::where('user_id', $auth->id)->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())->first();
         $userNutrion->activityCalories += $totalBurnedCalories;
         // add calorieleft
         $userNutrion->calorieLeft = $userNutrion->calorieLeft + $totalBurnedCalories;
@@ -921,7 +921,7 @@ class UserController extends Controller
     public function getSportCaloriBurn()
     {
         $auth = auth()->user();
-        $today = date('Y-m-d');
+        $today =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
 
         $totalBurnedCalories = sportTrackingActivity::where('user_id', $auth->id)
             ->where('date', $today)
@@ -938,7 +938,7 @@ class UserController extends Controller
     public function getUseSportAcivityData(Request $request)
     {
         $auth = auth()->user();
-        $date = $request->input('date', date('Y-m-d'));
+        $date = $request->input('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString());
         $days = $request->input('days', 7); // default to 7 days if not specified
 
         $endDate = date('Y-m-d', strtotime($date));
@@ -987,7 +987,7 @@ class UserController extends Controller
 
         $myMission = MyMission::where('user_id', $auth->id)
             ->where('mission_id', $mission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->first();
 
         if (!$myMission) {
@@ -1030,13 +1030,13 @@ class UserController extends Controller
             $foodActivityTrack->size = $size;
             $foodActivityTrack->unit = $unit;
             $foodActivityTrack->meal_type = $request->meal_type;
-            $foodActivityTrack->date = date('Y-m-d');
+            $foodActivityTrack->date =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
             $foodActivityTrack->save();
         }
 
         $myMission->current += $totalCaloriesIntake;
 
-        $userNutrion = MyNutrion::where('user_id', $auth->id)->where('date', date('Y-m-d'))->first();
+        $userNutrion = MyNutrion::where('user_id', $auth->id)->where('date',Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())->first();
 
         // STORE total cal intake
         $userNutrion->intakeCalories += $totalCaloriesIntake;
@@ -1077,7 +1077,7 @@ class UserController extends Controller
         $date = $request->date; // tanggal yang diinput user
 
         if ($date == null) {
-            $date = date('Y-m-d');
+            $date =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
         }
         $auth = auth()->user(); // user yang sedang login
 
