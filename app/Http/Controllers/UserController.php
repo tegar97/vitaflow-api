@@ -898,7 +898,7 @@ class UserController extends Controller
         $userNutrion = MyNutrion::where('user_id', $auth->id)->where('date', date('Y-m-d'))->first();
         $userNutrion->activityCalories += $totalBurnedCalories;
         // add calorieleft
-        $userNutrion->calorieLeft = $userNutrion->calorieLeft -  $totalBurnedCalories;
+        $userNutrion->calorieLeft = $userNutrion->calorieLeft + $totalBurnedCalories;
         $userNutrion->save();
         if ($myMission->current >= $myMission->target) {
             if ($myMission->status != 'finish') { // tambahkan pengecekan ini
@@ -911,6 +911,7 @@ class UserController extends Controller
                 $user->save();
             }
         }
+        $myMission->save();
 
         return response()->json([
             'message' => 'Success',
