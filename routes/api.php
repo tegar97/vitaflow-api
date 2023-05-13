@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\ProductController;
@@ -50,6 +51,9 @@ Route::group([
     Route::get("food/{foodId}", [FoodController::class, 'getFoodDetail']);
     Route::get('/food/{foodId}/unit', [FoodController::class, 'getFoodServingUnit']);
 
+     // Exercise
+    Route::get("exercise", [ExerciseController::class, 'getExerciseProgram']);
+    Route::post("exercise/search", [ExerciseController::class, 'searchExerciseProgram']);
 
     Route::get("programs", [ProgramController::class, 'index']);
     Route::get("programs/{id}", [ProgramController::class, 'show']);
@@ -117,6 +121,7 @@ Route::group([
     Route::post('/premium/pay/bca', [UserController::class, 'activePremiumBca']);
     Route::post('/webhook', [UserController::class, 'webHookHandler']);
     Route::post('/verify', [UserController::class, 'paymentValidation']);
+
 
 
 
