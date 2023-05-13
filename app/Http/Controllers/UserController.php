@@ -427,7 +427,7 @@ class UserController extends Controller
 
         $myMission = MyMission::where('user_id', $auth->id)
             ->where('mission_id', $mission->id)
-            ->where('date', date('Y-m-d'))
+            ->where('date', Carbon::now()->setTimezone('Asia/Jakarta')->toDateString())
             ->first();
 
         if (!$myMission) {
