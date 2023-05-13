@@ -7,30 +7,43 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\category_article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 class ArticleController extends Controller
 {
 
     public function getArticleData()
     {
-        $articles = Article::all();
-        $result = array();
+        $redis = Redis::connection(); // memanggil koneksi Redis
 
-        foreach ($articles as $article) {
-            $wordCount = str_word_count(strip_tags($article->content));
-            $readingTime = ceil($wordCount / 200);
-            $category = category_article::find($article->category_article_id); // get the related category
-            $categoryName = $category->name;
-            // assuming 200 words per minute reading speed
-            $result[] = [
-                'id' => $article->id,
-                'name' => $article->name,
-                'image' => $article->image,
-                'content' => $article->content,
-                'category_id' => $article->category_article_id,
-                'category' => $categoryName,
-                'reading_time' => $readingTime // estimated reading time in minutes
-            ];
+        // memeriksa apakah data sudah tersimpan di cache
+        if ($redis->exists('article_data')) {
+            $result = json_decode($redis->get('article_data'), true);
+        } else {
+            $articles = Article::all();
+            $result = array();
+
+            foreach ($articles as $article) {
+                $wordCount = str_word_count(strip_tags($article->content));
+                $readingTime = ceil($wordCount / 200);
+                $category = category_article::find($article->category_article_id); // get the related category
+                $categoryName = $category->name;
+                // assuming 200 words per minute reading speed
+                $result[] = [
+                    'id' => $article->id,
+                    'name' => $article->name,
+                    'image' => $article->image,
+                    'content' => $article->content,
+                    'category_id' => $article->category_article_id,
+                    'category' => $categoryName,
+                    'reading_time' => $readingTime // estimated reading time in minutes
+                ];
+            }
+
+            // menyimpan hasil ke dalam cache Redis
+            $redis->set('article_data', json_encode($result));
+            $redis->expire('article_data', 60); // set expire time 60 detik
+
         }
 
         // return with json
@@ -38,8 +51,8 @@ class ArticleController extends Controller
             'message' => 'Success',
             'data' => $result
         ], 200);
-
     }
+
 
     public function getArticleDetail($articleId)
     {

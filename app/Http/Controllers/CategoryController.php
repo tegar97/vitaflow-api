@@ -15,14 +15,28 @@ class CategoryController extends Controller
 
     public function getCategoryData()
     {
-        $categories = Category::select('id', 'name')->get();
+        $redis = Redis::connection(); // memanggil koneksi Redis
 
-        // return json
+        // memeriksa apakah data sudah tersimpan di cache
+        if ($redis->exists('category_data')) {
+            $result = json_decode($redis->get('category_data'), true);
+        } else {
+            $categories = Category::select('id', 'name')->get();
+
+            // menyimpan hasil ke dalam cache Redis
+            $redis->set('category_data', json_encode($categories));
+            $redis->expire('category_data', 60); // set expire time 60 detik
+
+            $result = $categories;
+        }
+
+        // return with json
         return response()->json([
             'status' => 'success',
-            'data' => $categories,
+            'data' => $result,
         ]);
     }
+
     public function index()
     {
         $categories = Category::all();
