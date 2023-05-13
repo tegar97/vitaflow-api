@@ -10,6 +10,29 @@ use Illuminate\Http\Request;
 
 class ExerciseController extends Controller
 {
+    public function getExerciseProgram()
+    {
+        $exerciseType = exerciseType::all();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $exerciseType
+        ]);
+    }
+
+    public function searchExerciseProgram(Request $request)
+    {
+        $exerciseType = exerciseType::where('exercise_name', 'like', '%' . $request->search . '%')->get();
+        return response()->json([
+            'status' => 'success',
+            'data' => $exerciseType
+        ]);
+    }
+
+
+
+
+
     /**
      * Display a listing of the resource.
      */
