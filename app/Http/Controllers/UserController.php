@@ -199,7 +199,7 @@ class UserController extends Controller
     private function getIdealWeight($height_in_cm, $gender)
     {
         // Menghitung ideal weight berdasarkan tinggi dan jenis kelamin
-        if ($gender == 'male') {
+        if ($gender == 'laki-laki') {
             return (0.9 * $height_in_cm - 100) * 0.9;
         } else {
             return (0.85 * $height_in_cm - 100) * 0.9;
@@ -210,7 +210,7 @@ class UserController extends Controller
     function getDailyCalories($gender, $age, $height_in_cm, $weight, $goal)
     {
         // Menghitung rekomendasi kalori harian berdasarkan jenis kelamin, umur, tinggi, berat badan, dan tujuan
-        if ($gender == 'male') {
+        if ($gender == 'laki-laki') {
             $bmr = 88.362 + (13.397 * $weight) + (4.799 * $height_in_cm) - (5.677 * $age);
         } else {
             $bmr = 447.593 + (9.247 * $weight) + (3.098 * $height_in_cm) - (4.330 * $age);
