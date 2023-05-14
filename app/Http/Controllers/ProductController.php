@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helper\imageResizer;
+use App\Helper\ImageResizer;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -105,7 +105,7 @@ class ProductController extends Controller
         ]);
 
         $image = $request->file('image');
-        $getImageName = imageResizer::ResizeImage($image, 'images', 'images', 300, 300);
+        $getImageName = ImageResizer::ResizeImage($image, 'images', 'images', 300, 300);
 
 
         $product = new Product();

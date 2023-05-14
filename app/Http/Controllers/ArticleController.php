@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helper\imageResizer;
+use App\Helper\ImageResizer;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\category_article;
@@ -111,7 +111,7 @@ class ArticleController extends Controller
         ]);
 
         $image = $request->file('image');
-        $getImageName = imageResizer::ResizeImage($image, 'images', 'images', 300, 300);
+        $getImageName = ImageResizer::ResizeImage($image, 'images', 'images', 300, 300);
 
 
         $article = new Article();

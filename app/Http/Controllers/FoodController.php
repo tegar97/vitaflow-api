@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helper\imageResizer;
+use App\Helper\ImageResizer;
 use App\Models\convertFoodUnit;
 use App\Models\Food;
 use App\Models\foodServingUnit;
@@ -228,7 +228,7 @@ class FoodController extends Controller
         ]);
 
         $image = $request->file('food_image');
-        $getImageName = imageResizer::ResizeImage($image, 'images', 'images', 80, 80);
+        $getImageName = ImageResizer::ResizeImage($image, 'images', 'images', 80, 80);
 
 
         //create new food serving unit

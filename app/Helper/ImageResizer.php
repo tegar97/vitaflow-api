@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 use Image;
 
-class imageResizer
+class ImageResizer
 {
 
     public static function ResizeImage($file, $folderName, $imageFor, $width = 80, $height = 80, $type = "png", $quality = 90)
