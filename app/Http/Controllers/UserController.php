@@ -1146,9 +1146,9 @@ class UserController extends Controller
         . buat bahasa kamu dengan user ramah dan tidak formal , dan jangan lupa untuk mengucapkan terima kasih jika user mengucapkan terima kasih.
 
         setiap menjawab berikan informasi
-        RECOMMEND_NEXT_WORD : ___ , ___ , ___
+        RECOMMEND_NEXT_QUESTION : ___ , ___ , ___
 
-        RECOMMEND_NEXT_WORD adalah kata yang direkomendasikan untuk user selanjutnya yang sesuai konteks pembicaraan sebelumnya, berikan 3 kata yang direkomendasikan
+        RECOMMEND_NEXT_QUESTION adalah pertanyaan yang direkomendasikan untuk user selanjutnya yang sesuai konteks pembicaraan sebelumnya, berikan 3 kata yang direkomendasikan
 " . $clientRequest;
 
 
