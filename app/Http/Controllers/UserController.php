@@ -1145,6 +1145,12 @@ class UserController extends Controller
           jika user menjawab diluar konteks diatas , jawab dengan permintaan maaf tidak bisa menjawab karena terbatas pengetahuan
         . buat bahasa kamu dengan user ramah dan tidak formal , dan jangan lupa untuk mengucapkan terima kasih jika user mengucapkan terima kasih.
 
+        setiap menjawab berikan informasi
+        REQUEST_INFO: ___
+        RECOMMEND_NEXT_WORD : ___
+
+        REQUEST_INFO ada 3 : REQUEST_DEFINITION, REQUEST_EXERCISE_INFO, REQUEST_NUTRITION_INFO
+        RECOMMEND_NEXT_WORD adalah kata yang direkomendasikan untuk user selanjutnya yang sesuai konteks pembicaraan sebelumnya
 " . $clientRequest;
 
 
