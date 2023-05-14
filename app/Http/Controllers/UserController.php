@@ -1144,7 +1144,7 @@ class UserController extends Controller
           jika user menjawab diluar konteks diatas, jawab dengan permintaan maaf tidak bisa menjawab karena terbatas pengetahuan.
           buat bahasa kamu dengan user ramah dan tidak formal, dan jangan lupa untuk mengucapkan terima kasih jika user mengucapkan terima kasih.
 
-          setiap menjawab berikan informasi.
+          setiap menjawab berikan informasi dibawah (wajib)
           RECOMMEND_NEXT_QUESTION: Apa jenis olahraga yang paling efektif untuk menurunkan berat badan?, Bagaimana cara mengatur pola makan yang sehat?, Berapa banyak air putih yang harus dikonsumsi setiap hari?
           " . $clientRequest;
 
