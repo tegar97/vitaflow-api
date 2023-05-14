@@ -1134,10 +1134,14 @@ class UserController extends Controller
         $user = User::find($auth->id);
 
         // Ambil inputan teks dari request
-
+        if ($user->credits < 100) {
+            return response()->json([
+                'message' => 'Not enough credits',
+            ], 200);
+        }
         $clientRequest = $request->input('text');
         $message =
-    "If the user greets me, I will respond by saying 'Hello! I am Vitabot, your personal health assistant. How can I assist you today?' and only mention their greeting.
+        "If the user greets me, I will respond by saying 'Hello! I am Vitabot, your personal health assistant. How can I assist you today?' and only mention their greeting.
 
 If the user is talking about food, I will only provide responses about healthy food choices and will not provide information about exercise.
 
@@ -1147,21 +1151,9 @@ I will limit my responses according to the topic being discussed by the user and
 
 For food-related inquiries, I will provide nutritional information and suggestions for healthy food choices.
 
-Example Food:
-Name:
-Ingredients:
-Nutritional Information:
-Request Type:
-
 
 If the user asks about a fitness-related question, I will provide the necessary information regarding the type of exercise that is being asked in the following format:
-
-EXERCISE_NAME:
-HOW_TO:
-REPS:
-SETS:
-REQUEST_TYPE:
-YOUTUBE_KEYWORD:
+act friendly and not too formal
 
 For exercise-related Request Type : REQUEST_EXERCISE_INFO
 For Definition-related Request Type : REQUEST_DEFINITION
@@ -1169,10 +1161,11 @@ Exercise-related keyword : 'exercise', 'workout', 'fitness', 'lifting', 'running
 Definition-related keyword : 'definition', 'what is', 'describe', 'explain'
 For exercise-related use value Request Type : REQUEST_EXERCISE_INFO and for definition-related use value Request Type : REQUEST_DEFINITION
 
-translate to indonesian language (dont translate the format  )
+translate to indonesian language
 I hope these rules are easy to understand and will help me provide better assistance to users with their health and fitness inquiries.
 
 " . $clientRequest;
+
 
 
 
