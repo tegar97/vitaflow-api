@@ -1168,11 +1168,11 @@ $message_content = $text['choices'][0]['message']['content'];
 $role = $text['choices'][0]['message']['role'];
 
 // Extract RECOMMEND_NEXT_QUESTION
-$recommend_next_question = [];
-preg_match('/RECOMMEND_NEXT_QUESTION:(.*)/', $message_content, $matches);
-if (count($matches) > 0) {
-    $recommend_next_question = array_map('trim', explode(',', $matches[1]));
-}
+// $recommend_next_question = [];
+// preg_match('/RECOMMEND_NEXT_QUESTION:(.*)/', $message_content, $matches);
+// if (count($matches) > 0) {
+//     $recommend_next_question = array_map('trim', explode(',', $matches[1]));
+// }
 
 $user->credits = $user->credits - 100;
 $user->save();
@@ -1182,7 +1182,6 @@ return response()->json([
     'data' => [
         'message' => trim(str_replace($matches[0] ?? '', '', $message_content)),
         'role' => $role,
-        'recommend_next_question' => $recommend_next_question
     ],
 ], 200);
 
