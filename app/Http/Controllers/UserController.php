@@ -1140,20 +1140,13 @@ class UserController extends Controller
             ], 200);
         }
         $clientRequest = $request->input('text');
-        $message =
-        " kamu adalah seoerang asisten chat bot yang bernama vita bot yang bisa menjawab seputar kesehatan (kesehatan tubuh) , olahraga , dan  ahli gizi.
-          jika user menjawab diluar konteks diatas , jawab dengan permintaan maaf tidak bisa menjawab karena terbatas pengetahuan
-        . buat bahasa kamu dengan user ramah dan tidak formal , dan jangan lupa untuk mengucapkan terima kasih jika user mengucapkan terima kasih.
+        $message = " kamu adalah seoerang asisten chat bot yang bernama vita bot yang bisa menjawab seputar kesehatan (kesehatan tubuh), olahraga, dan ahli gizi.
+          jika user menjawab diluar konteks diatas, jawab dengan permintaan maaf tidak bisa menjawab karena terbatas pengetahuan.
+          buat bahasa kamu dengan user ramah dan tidak formal, dan jangan lupa untuk mengucapkan terima kasih jika user mengucapkan terima kasih.
 
-        setiap menjawab berikan informasi
-        RECOMMEND_NEXT_QUESTION : ___ , ___ , ___
-
-        RECOMMEND_NEXT_QUESTION adalah pertanyaan yang direkomendasikan untuk user selanjutnya yang sesuai konteks pembicaraan sebelumnya, berikan 3 kata yang direkomendasikan
-" . $clientRequest;
-
-
-
-
+          setiap menjawab berikan informasi.
+          RECOMMEND_NEXT_QUESTION: Apa jenis olahraga yang paling efektif untuk menurunkan berat badan?, Bagaimana cara mengatur pola makan yang sehat?, Berapa banyak air putih yang harus dikonsumsi setiap hari?
+          " . $clientRequest;
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . env('OPENAI_API_KEY')
@@ -1171,24 +1164,22 @@ class UserController extends Controller
 
         $text = json_decode($text, true);
 
-        $message_content =
-        $text['choices'][0]['message']['content'];
+        $message_content = $text['choices'][0]['message']['content'];
         $role = $text['choices'][0]['message']['role'];
 
+        // Extract RECOMMEND_NEXT_QUESTION
+        preg_match('/RECOMMEND_NEXT_QUESTION:(.*)/', $message_content, $matches);
+        $recommend_next_question = array_map('trim', explode(',', $matches[1]));
 
         $user->credits = $user->credits - 100;
         $user->save();
 
-
-
-
-
         return response()->json([
             'message' => 'Success',
             'data' => [
-                'message' => $message_content,
+                'message' => trim(str_replace($matches[0], '', $message_content)),
                 'role' => $role,
-
+                'recommend_next_question' => $recommend_next_question
             ],
         ], 200);
 
