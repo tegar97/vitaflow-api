@@ -1153,7 +1153,7 @@ class UserController extends Controller
 ])->post(env('OPENAI_URL'), [
     "model" => "gpt-3.5-turbo",
         "temperature"=> 0.66,
-    "max_tokens"=> 2147,
+    "max_tokens"=> 100,
     "top_p"=> 1,
     "frequency_penalty"=> 0,
     "presence_penalty"=> 0,
