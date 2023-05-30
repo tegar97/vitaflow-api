@@ -1144,15 +1144,14 @@ class UserController extends Controller
           jika user menjawab diluar konteks diatas, jawab dengan permintaan maaf tidak bisa menjawab karena terbatas pengetahuan.
           buat bahasa kamu dengan user ramah dan tidak formal, dan jangan lupa untuk mengucapkan terima kasih jika user mengucapkan terima kasih.
 
-          setiap menjawab berikan informasi dibawah (wajib)
-          RECOMMEND_NEXT_QUESTION: Apa jenis olahraga yang paling efektif untuk menurunkan berat badan?, Bagaimana cara mengatur pola makan yang sehat?, Berapa banyak air putih yang harus dikonsumsi setiap hari?
+
           " . $clientRequest;
 
         $response = Http::withHeaders([
     'Authorization' => 'Bearer ' . env('OPENAI_API_KEY')
 ])->post(env('OPENAI_URL'), [
     "model" => "gpt-3.5-turbo",
-        "temperature"=> 0.66,
+        "temperature"=> 0.1,
     "max_tokens"=> 50,
     "top_p"=> 0.9,
     "frequency_penalty"=> 0,
