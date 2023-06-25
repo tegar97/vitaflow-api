@@ -8,6 +8,7 @@ use App\Http\Controllers\FoodController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\ReelController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,7 +32,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // genereate with version api
 
 Route::group([
-    'prefix' => 'v1'
+    'prefix' => 'v2'
 ], function () {
 
     // Vitamart
@@ -74,7 +75,6 @@ Route::group([
         Route::delete("missions/{id}/{program_id}", [MissionController::class, 'destroy']);
 
     });
-
 
 
 
@@ -124,9 +124,15 @@ Route::group([
 
 
 
+    // Reels
+    Route::get('reels', [ReelController::class, 'index']);
 
 
+    // DailyLogin
+    Route::get('daily-login', [UserController::class, 'showDailyLogin']);
+    Route::post('daily-login/{dailyLoginId}', [UserController::class, 'claimReward']);
 
+    Route::get('leaderboard', [UserController::class, 'leaderboard']);
     Route::group([
         'prefix' => 'auth'
     ], function () {

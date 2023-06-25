@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DailyLogin;
 use App\Models\exerciseType;
 use App\Models\Food;
 use App\Models\FoodActivityTracking;
@@ -80,7 +81,7 @@ class UserController extends Controller
         }
 
         // Mencari program yang cocok berdasarkan BMI
-        $programs = Program::where('program_type', $goal)->first();
+        $programs  = Program::where('program_type', $goal)->first();
 
         // Memasukkan hasil survei dan hasil nilai BMI ke dalam model user
         // $user = new User();
@@ -174,7 +175,46 @@ class UserController extends Controller
         }
 
 
-        // code
+        // Generate Dialy login
+
+        $currentDate = $startDate;
+        $dayCount = 1;
+
+        while ($currentDate <= $endDate) {
+            $myDailyLogin = new DailyLogin();
+            $myDailyLogin->login_date = $currentDate;
+            $myDailyLogin->user_id = $auth->id;
+
+            // Set reward title and type
+            if ($dayCount == 7) {
+                $myDailyLogin->reward_title = 'Premium Reward';
+                $myDailyLogin->reward_type = 'type_premium';
+                $myDailyLogin->reward_value = 7;
+            } else {
+                $myDailyLogin->reward_title = 'Point Reward';
+                $myDailyLogin->reward_type = 'type_point';
+
+                // Set reward value based on day count
+                if ($dayCount == 1 || $dayCount == 4) {
+                    $myDailyLogin->reward_value = 20;
+                } else {
+                    $myDailyLogin->reward_value = 10;
+                }
+            }
+
+            $myDailyLogin->reward_received = false;
+
+            $myDailyLogin->save();
+
+            $currentDate = date('Y-m-d', strtotime($currentDate . ' +1 day'));
+            $dayCount++;
+        }
+
+
+
+
+
+
 
 
 
@@ -1448,6 +1488,39 @@ return response()->json([
 
     }
 
+    public function showDailyLogin(Request $request)
+    {
+
+        $auth = auth()->user();
+
+        if (!$auth) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+        //
+
+
+
+        $limit = $request->input('limit', 7); // Jumlah data yang ingin ditampilkan, defaultnya 7
+
+        $dailyLogins = DailyLogin::where('user_id', $auth->id)
+        ->orderBy('login_date', 'asc')
+        ->limit($limit)
+        ->get();
+
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'List daily login',
+                'data' => $dailyLogins
+            ],
+            200
+        );
+
+    }
+
     // validasi pembayaran
 
     public function paymentValidation( Request $request) {
@@ -1475,6 +1548,125 @@ return response()->json([
 
 
     }
+
+    public function claimReward(Request $request, $dailyLoginId)
+    {
+        $auth = auth()->user();
+
+        if (!$auth) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $dailyLogin = DailyLogin::find($dailyLoginId);
+
+        if (!$dailyLogin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Daily Login not found'
+            ], 404);
+        }
+
+        // Pastikan bahwa daily login dimiliki oleh pengguna yang saat ini terautentikasi
+        if ($dailyLogin->user_id !== $auth->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // Pastikan bahwa reward belum di-claim sebelumnya
+        if ($dailyLogin->reward_received) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Reward already claimed'
+            ], 400);
+        }
+
+        // Pengecekan apakah reward untuk hari ini
+        $today = date('Y-m-d');
+        if ($dailyLogin->login_date !== $today) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Reward has expired'
+            ], 400);
+        }
+
+        // Lakukan proses klaim reward di sini (misalnya, menandai reward sebagai sudah di-claim)
+        $dailyLogin->reward_received = true;
+
+        if($dailyLogin->reward_type == 'type_point') {
+            $user = User::where('id', $auth->id)->first();
+            $user->point = $user->point + $dailyLogin->reward_value;
+
+            $user->save();
+        }
+
+        if($dailyLogin->reward_type == 'type_premium') {
+            $user = User::where('id', $auth->id)->first();
+            $user->is_premium = 1;
+            $user->premium_expires_at = Carbon::now()->addDays($dailyLogin->reward_value);
+            $user->save();
+
+        }
+
+
+
+
+        $dailyLogin->save();
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reward claimed successfully'
+        ]);
+    }
+
+    public function leaderboard(Request $request)
+    {
+        $rankFilter = $request->input('rank'); // Mendapatkan nilai filter rank dari request
+
+        $leaderboard = User::select('name', 'point', 'gender', 'age', 'is_premium', 'premium_expires_at', 'id')
+        ->orderBy('point', 'desc')
+        ->get();
+
+        $result = [];
+        foreach ($leaderboard as $key => $item) {
+            $name =  $item->name;
+            $rank = $this->getRank($item->point);
+            $point = $item->point;
+
+            // Jika terdapat filter rank dan rank tidak cocok, maka lewati iterasi ini
+            if ($rankFilter && $rank !== $rankFilter) {
+                continue;
+            }
+
+            $result[] = [
+                'rank' => $rank,
+                'user' => $name,
+                'total_points' => $point
+            ];
+        }
+
+        return response()->json($result);
+    }
+
+    private function getRank($points)
+    {
+        if ($points <= 300) {
+            return 'Rookie';
+        } elseif ($points <= 1000) {
+            return 'Apprentice';
+        } elseif ($points <= 3000) {
+            return 'Expert';
+        } else {
+            return 'Specialist';
+        }
+    }
+
 
 
 }
