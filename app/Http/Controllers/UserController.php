@@ -120,7 +120,7 @@ class UserController extends Controller
         $missions = Mission::where('program_id', $program->id)->get();
 
         // generate my_mission
-        $startDate =Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
+        $startDate = Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
         $endDate = date('Y-m-d', strtotime('+14 days'));
         $currentDate = $startDate;
 
