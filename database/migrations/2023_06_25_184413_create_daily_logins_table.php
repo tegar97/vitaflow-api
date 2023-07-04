@@ -17,9 +17,10 @@ return new class extends Migration
             $table->boolean('reward_received')->default(false);
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string('reward_image')->nullable();
             $table->string('reward_title');
             $table->integer('reward_value');
-            $table->enum('reward_type', ['type_point', 'type_premium']);
+            $table->enum('reward_type', ['type_coin', 'type_bamboo', 'type_vip_subscription']);
             $table->timestamps();
         });
     }

@@ -50,6 +50,13 @@ class UserController extends Controller
             'target_weight' => 'required|numeric',
         ]);
 
+        if($auth->is_surveyed == true){
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already filled out the survey'
+            ], 400);
+        }
+
         // Menghitung nilai BMI
         $height_in_meters = $request->height / 100;
         $bmi = $request->weight / ($height_in_meters ** 2);
@@ -95,6 +102,7 @@ class UserController extends Controller
         $user->target_weight = $request->target_weight;
         $user->bmi = $bmi;
         $user->recommend_calories = $daily_calories;
+        $user->is_surveyed = true;
 
 
         // $user->programs()->sync($programs);
@@ -117,7 +125,7 @@ class UserController extends Controller
         // 2.generate my_mission until end_date
         $program = Program::find($programs->id);
         // get all mission
-        $missions = Mission::where('program_id', $program->id)->get();
+        $missions = Mission::all();
 
         // generate my_mission
         $startDate = Carbon::now()->setTimezone('Asia/Jakarta')->toDateString();
@@ -147,22 +155,22 @@ class UserController extends Controller
                 $myMission->mission_id = $mission->id;
                 $myMission->user_id = $auth->id;
                 $myMission->status = 'on-going';
-                if (strtolower(trim($mission->name)) == 'catat aktivitas makanan') {
+                if ($mission->mission_code  ==  'M1') {
                     $myMission->target = $daily_calories;
                     $myMission->type_target = 'cal';
-                } else if (strtolower(trim($mission->name)) == 'catat aktivitas olahraga') {
+                } else if ($mission->mission_code == 'M2') {
                     $myMission->target = 300;
                     $myMission->type_target = 'cal';
-                } else if (strtolower(trim($mission->name)) == 'catat aktivitas lari/ jalan') {
+                } else if ($mission->mission_code == 'M3') {
                     $myMission->target = 2000;
                     $myMission->type_target = 'langkah';
-                } else if (strtolower(trim($mission->name)) == 'catat asupan minum') {
+                } else if ($mission->mission_code == 'M4') {
                     $myMission->target = 8;
                     $myMission->type_target = 'gelas';
-                } else if (strtolower(trim($mission->name)) == 'catat berat badan') {
+                } else if ($mission->mission_code== 'M5') {
                     $myMission->target = 0;
                     $myMission->type_target = 'kg';
-                } else if (strtolower(trim($mission->name)) == 'check kesehatan anda') {
+                } else if ($mission->mission_code == 'M6') {
                     $myMission->target = 0;
                     $myMission->type_target = 'bpm';
                 }
@@ -187,18 +195,21 @@ class UserController extends Controller
 
             // Set reward title and type
             if ($dayCount == 7) {
-                $myDailyLogin->reward_title = 'Premium Reward';
-                $myDailyLogin->reward_type = 'type_premium';
+                $myDailyLogin->reward_title = 'Vip Reward';
+                $myDailyLogin->reward_type = 'type_vip_subscription';
                 $myDailyLogin->reward_value = 7;
             } else {
-                $myDailyLogin->reward_title = 'Point Reward';
-                $myDailyLogin->reward_type = 'type_point';
+
+
+                $myDailyLogin->reward_title = 'Coin Reward';
+                $myDailyLogin->reward_type = 'type_coin';
 
                 // Set reward value based on day count
                 if ($dayCount == 1 || $dayCount == 4) {
-                    $myDailyLogin->reward_value = 20;
-                } else {
-                    $myDailyLogin->reward_value = 10;
+                    $myDailyLogin->reward_value = 2;
+                }
+                 else {
+                    $myDailyLogin->reward_value = 1;
                 }
             }
 
@@ -456,7 +467,7 @@ class UserController extends Controller
     {
         $auth = auth()->user();
 
-        $mission = Mission::where('name', "Catat asupan Minum")->first();
+        $mission = Mission::where('mission_code', "M4")->first();
 
         // check if mission is exist
         if (!$mission) {
@@ -583,7 +594,7 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
 
-        $mission = Mission::where('name', 'like', '%catat berat badan%')->first();
+        $mission = Mission::where('mission_code' , 'M5')->first();
 
         // check if mission is exist
         if (!$mission) {
@@ -684,7 +695,7 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
 
-        $mission = Mission::where('name', 'like', '%Catat Aktivitas Lari/ Jalan%')->first();
+        $mission = Mission::where('mission_code' , 'M3')->first();
 
         // check if mission is exist
         if (!$mission) {
@@ -774,7 +785,7 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
 
-        $mission = Mission::where('name', 'like', '%Check Kesehatan anda%')->first();
+        $mission = Mission::where('mission_code', 'M6')->first();
 
         // check if mission is exist
         if (!$mission) {
@@ -894,7 +905,7 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
 
-        $mission = Mission::where('name', 'like', '%Catat Aktivitas Olahraga%')->first();
+        $mission = Mission::where('mission_code', 'M2')->first();
 
         if (!$mission) {
             return response()->json(['error' => 'Data not found'], 404);
@@ -1019,7 +1030,7 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
 
-        $mission = Mission::where('name', 'like', '%Catat Aktivitas Makanan%')->first();
+        $mission = Mission::where('mission_code', 'M1')->first();
 
         if (!$mission) {
             return response()->json(['error' => 'Data not found'], 404);
@@ -1174,9 +1185,9 @@ class UserController extends Controller
         $user = User::find($auth->id);
 
         // Ambil inputan teks dari request
-        if ($user->credits < 100) {
+        if ($user->bamboo < 1) {
             return response()->json([
-                'message' => 'Not enough credits',
+                'message' => 'Not enough bamboo',
             ], 200);
         }
         $clientRequest = $request->input('text');
@@ -1218,7 +1229,7 @@ $role = $text['choices'][0]['message']['role'];
 //     $recommend_next_question = array_map('trim', explode(',', $matches[1]));
 // }
 
-$user->credits = $user->credits - 100;
+$user->credits = $user->bamboo - 2;
 $user->save();
 
 return response()->json([
@@ -1240,10 +1251,10 @@ return response()->json([
         $user = User::find($auth->id);
 
 
-        if (!$user->is_premium) { // Jika user belum premium
-            $user->is_premium = true; // Aktifkan premium
+        if (!$user->vip) { // Jika user belum premium
+            $user->vip = true; // Aktifkan premium
             $user->credits = 9999999;
-            $user->premium_expires_at = Carbon::now()->addDays(7); // Berikan durasi trial 7 hari
+            $user->vip_expires_at = Carbon::now()->addDays(7); // Berikan durasi trial 7 hari
             $user->save(); // Simpan perubahan
 
             return response()->json(['message' => 'Trial premium activated successfully.'], 200);
@@ -1429,15 +1440,13 @@ return response()->json([
 
             if($grossAmount == 30000) {
                 $buyers->update([
-                    'is_premium' => 1,
-                    'credits' => 9999999,
-                    'expired_premium' => Carbon::now()->addDays(30)
+                    'vip' => 1,
+                    'vip_expires_at' => Carbon::now()->addDays(30)
                 ]);
             }else{
                 $buyers->update([
-                    'is_premium' => 1,
-                    'credits' => 9999999,
-                    'premium_expires_at' => Carbon::now()->addDays(365)
+                    'vip' => 1,
+                    'vip_expires_at' => Carbon::now()->addDays(365)
                 ]);
             }
 
@@ -1597,17 +1606,17 @@ return response()->json([
         // Lakukan proses klaim reward di sini (misalnya, menandai reward sebagai sudah di-claim)
         $dailyLogin->reward_received = true;
 
-        if($dailyLogin->reward_type == 'type_point') {
+        if($dailyLogin->reward_type == 'type_coin') {
             $user = User::where('id', $auth->id)->first();
-            $user->point = $user->point + $dailyLogin->reward_value;
+            $user->coin = $user->coin + $dailyLogin->reward_value;
 
             $user->save();
         }
 
-        if($dailyLogin->reward_type == 'type_premium') {
+        if($dailyLogin->reward_type == 'type_vip_subscription') {
             $user = User::where('id', $auth->id)->first();
-            $user->is_premium = 1;
-            $user->premium_expires_at = Carbon::now()->addDays($dailyLogin->reward_value);
+            $user->vip= 1;
+            $user->vip_expires_at = Carbon::now()->addDays($dailyLogin->reward_value);
             $user->save();
 
         }
@@ -1625,34 +1634,34 @@ return response()->json([
         ]);
     }
 
-    public function leaderboard(Request $request)
-    {
-        $rankFilter = $request->input('rank'); // Mendapatkan nilai filter rank dari request
+    // public function leaderboard(Request $request)
+    // {
+    //     $rankFilter = $request->input('rank'); // Mendapatkan nilai filter rank dari request
 
-        $leaderboard = User::select('name', 'point', 'gender', 'age', 'is_premium', 'premium_expires_at', 'id')
-        ->orderBy('point', 'desc')
-        ->get();
+    //     $leaderboard = User::select('name', 'point', 'gender', 'age', 'is_premium', 'premium_expires_at', 'id')
+    //     ->orderBy('point', 'desc')
+    //     ->get();
 
-        $result = [];
-        foreach ($leaderboard as $key => $item) {
-            $name =  $item->name;
-            $rank = $this->getRank($item->point);
-            $point = $item->point;
+    //     $result = [];
+    //     foreach ($leaderboard as $key => $item) {
+    //         $name =  $item->name;
+    //         $rank = $this->getRank($item->point);
+    //         $point = $item->point;
 
-            // Jika terdapat filter rank dan rank tidak cocok, maka lewati iterasi ini
-            if ($rankFilter && $rank !== $rankFilter) {
-                continue;
-            }
+    //         // Jika terdapat filter rank dan rank tidak cocok, maka lewati iterasi ini
+    //         if ($rankFilter && $rank !== $rankFilter) {
+    //             continue;
+    //         }
 
-            $result[] = [
-                'rank' => $rank,
-                'user' => $name,
-                'total_points' => $point
-            ];
-        }
+    //         $result[] = [
+    //             'rank' => $rank,
+    //             'user' => $name,
+    //             'total_points' => $point
+    //         ];
+    //     }
 
-        return response()->json($result);
-    }
+    //     return response()->json($result);
+    // }
 
     private function getRank($points)
     {
@@ -1666,6 +1675,182 @@ return response()->json([
             return 'Specialist';
         }
     }
+
+
+    public function getMyMission(Request $request)
+    {
+        $auth = auth()->user();
+
+        if (!$auth) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $myNutrion = MyNutrion::select('date', 'targetCalories', 'calorieLeft', 'activityCalories', 'carbohydrate', 'protein', 'fat', 'intakeCalories')
+        ->where('user_id', $auth->id)
+            ->get();
+
+        $myMissions = MyMission::where('user_id', $auth->id)
+            ->with('mission')
+            ->get()
+            ->map(function ($myMission) {
+                $percentage_success = 0;
+
+                if ($myMission->type_target == 'cal' or $myMission->type_target == 'langkah' or $myMission->type_target == 'gelas') {
+                    $percentage_success = ($myMission->current / $myMission->target) * 100;
+                }
+
+                if ($myMission->status == 'finish') {
+                    $percentage_success = 100;
+                }
+
+                if ($percentage_success > 100) {
+                    $percentage_success = 100;
+                }
+
+                return [
+                    'name' => $myMission->mission->name,
+                    'description' => $myMission->mission->description,
+                    'icon' => $myMission->mission->icon,
+                    'color_theme' => $myMission->mission->color_Theme,
+                    'coin' => $myMission->mission->coin,
+                    'target' => $myMission->target,
+                    'current' => $myMission->current,
+                    'type_target' => $myMission->type_target,
+                    'status' => $myMission->status,
+                    'date' => $myMission->date,
+                    'percentage_success' => $percentage_success,
+                ];
+            });
+
+        // Grouping missions by date
+        $groupedMissions = $myMissions->groupBy('date')->map(function ($missions) {
+            $totalPercentageSuccess = $missions->sum('percentage_success') / $missions->count();
+            $missionCount = $missions->count();
+            $missiomSuccessCount = $missions->where('percentage_success', 100)->count();
+
+            return [
+                'percentage_success' => $totalPercentageSuccess,
+                'total_mission' => $missionCount,
+                'mission_success_count' => $missiomSuccessCount,
+                'missions' => $missions,
+            ];
+        });
+
+        $response = [];
+        $currentDate = now()->toDateString();
+
+        foreach ($groupedMissions as $date => $data) {
+            $day = Carbon::parse($date)->diffInDays($currentDate) + 1;
+
+            // Find corresponding nutrition data for the date
+            $nutritionData = $myNutrion->firstWhere('date', $date);
+
+            $response[] = [
+                'day' => $day,
+                'is_today' => $date === $currentDate,
+                'percentage_success' => $data['percentage_success'],
+                'mission_success_count' => $data['mission_success_count'],
+                'targetCalories' => $nutritionData ? $nutritionData->targetCalories : null,
+                'calorieLeft' => $nutritionData ? $nutritionData->calorieLeft : null,
+                'activityCalories' => $nutritionData ? $nutritionData->activityCalories : null,
+                'missions' => $data['missions'],
+            ];
+        }
+
+        return response()->json($response);
+    }
+
+
+    public function leaderboard($limit = 10){
+
+
+
+        $leaderboard = User::select('name', 'point', 'gender', 'age', 'vip', 'vip_expires_at', 'id')
+        ->orderBy('point', 'desc')
+        ->limit($limit)
+
+        ->get();
+
+
+        return response()->json($leaderboard);
+
+
+
+    }
+
+    public function getRankTop3 ()
+    {
+
+
+
+        $leaderboard = User::select('name', 'point', 'gender', 'age', 'vip', 'vip_expires_at', 'id')
+            ->orderBy('point', 'desc')
+            ->limit(3)
+
+            ->get();
+
+
+        return response()->json($leaderboard);
+
+
+    }
+
+    public function getRank4To10()
+    {
+        $leaderboard = User::select('name', 'point', 'gender', 'age', 'vip', 'vip_expires_at', 'id')
+            ->orderBy('point', 'desc')
+            ->offset(3) // Mengabaikan 3 peringkat teratas
+            ->limit(7)  // Mengambil 7 data (peringkat 4-10)
+            ->get();
+
+        return response()->json($leaderboard);
+    }
+
+
+    public function covertCoinToBambo(Request $request)
+    {
+        $auth = auth()->user();
+
+        $user = User::where('id', $auth->id)->first();
+        $coinToConvert = $request->input('coin');
+        $conversionRate = 10;
+        $bamboToAdd = $coinToConvert * $conversionRate;
+
+        // coint to convert harus lebih dari 0
+        if ($coinToConvert <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Coin to convert must be greater than 0'
+            ]);
+        }
+
+        // Cek ketersediaan koin
+        if ($coinToConvert > $user->coin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient coins'
+            ]);
+        }
+
+
+
+
+        $user->coin -= $coinToConvert;
+        $user->bamboo += $bamboToAdd;
+
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Coins converted successfully'
+        ]);
+    }
+
+
+
 
 
 

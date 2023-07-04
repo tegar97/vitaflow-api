@@ -32,7 +32,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // genereate with version api
 
 Route::group([
-    'prefix' => 'v2'
+    'prefix' => 'v1'
 ], function () {
 
     // Vitamart
@@ -132,7 +132,17 @@ Route::group([
     Route::get('daily-login', [UserController::class, 'showDailyLogin']);
     Route::post('daily-login/{dailyLoginId}', [UserController::class, 'claimReward']);
 
-    Route::get('leaderboard', [UserController::class, 'leaderboard']);
+    // Route::get('leaderboard', [UserController::class, 'leaderboard']);
+
+    Route::get('mymission', [UserController::class, 'getMyMission']);
+    Route::get('/leaderboard/{limit}', [UserController::class, 'leaderboard']);
+    Route::get('/leaderboardTop3', [UserController::class, 'getRankTop3']);
+    Route::get('/leaderboardTop3To10', [UserController::class, 'getRank4To10']);
+
+    Route::post('/convertbamboo', [UserController::class, 'covertCoinToBambo']);
+
+
+
     Route::group([
         'prefix' => 'auth'
     ], function () {

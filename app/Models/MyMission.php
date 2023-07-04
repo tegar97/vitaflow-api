@@ -9,14 +9,7 @@ class MyMission extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'mission_id',
-        'status',
-        'target',
-        'current',
-        'type_target'
-    ];
+    protected $guarded = [];
 
     public function user()
     {

@@ -16,11 +16,18 @@ return new class extends Migration
 
             // mission
             $table->string('name');
+            $table->string('mission_code');
+            $table->string('alternatif_name');
             $table->string('description');
             $table->string('icon');
             $table->string('color_Theme');
+            $table->integer('order_number');
             // point
-            $table->integer('point');
+            $table->integer('point')->default(0);
+            // coin
+            $table->integer('coin')->default(0);
+            // bamboo]
+            $table->integer('bamboo')->default(0);
 
             $table->timestamps();
         });
