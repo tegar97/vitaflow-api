@@ -1722,6 +1722,7 @@ return response()->json([
                     'status' => $myMission->status,
                     'date' => $myMission->date,
                     'percentage_success' => $percentage_success,
+                    'route' => $myMission->mission->route,
                 ];
             });
 

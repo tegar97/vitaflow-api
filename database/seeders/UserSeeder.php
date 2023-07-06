@@ -16,11 +16,11 @@ class UserSeeder extends Seeder
 
         DB::table('users')->insert([[
             'name' => 'Jhon Doe',
-            'email' => 'jhon@doe',
+            'email' => 'jhon@email.com',
             'password' => bcrypt('password'),
         ], [
             'name' => 'Jane Doe',
-            'email' => 'jane@doe',
+            'email' => 'jane@email.com',
             'password' => bcrypt('password'),
         ]]);
     }

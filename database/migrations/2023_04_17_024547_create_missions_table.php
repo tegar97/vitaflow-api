@@ -28,6 +28,8 @@ return new class extends Migration
             $table->integer('coin')->default(0);
             // bamboo]
             $table->integer('bamboo')->default(0);
+            //ROUTE
+            $table->string('route')->nullable();
 
             $table->timestamps();
         });

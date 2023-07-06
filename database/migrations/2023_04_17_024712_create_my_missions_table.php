@@ -28,6 +28,7 @@ return new class extends Migration
 
 
 
+
             // type target : cal,langkah ,gelas
             $table->enum('type_target', ['cal', 'langkah', 'gelas','kg','bpm'])->default('cal');
             $table->timestamps();
