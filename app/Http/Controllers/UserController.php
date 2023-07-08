@@ -1824,16 +1824,18 @@ return response()->json([
         if ($coinToConvert <= 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Coin to convert must be greater than 0'
-            ]);
+                'message' => 'Koin yang ingin di konversi harus lebih dari 0 ',
+
+            ], 400);
         }
 
         // Cek ketersediaan koin
         if ($coinToConvert > $user->coin) {
+            // Insufficient coins and status code 402
             return response()->json([
                 'success' => false,
-                'message' => 'Insufficient coins'
-            ]);
+                'message' => ' Koin tidak cukup'
+            ], 402);
         }
 
 
