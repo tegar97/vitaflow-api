@@ -76,13 +76,13 @@ class UserController extends Controller
         $bmi_classification = $this->bmiClassification($bmi);
 
         if ($bmi < 18.5 && $goal == 'loss') {
-            $warning = "Warning: Your BMI indicates that you are underweight. It may not be healthy to try to gain weight at this time.";
+            $warning = "BMI Anda menunjukkan bahwa Anda kekurangan berat badan. Mungkin tidak sehat untuk mencoba menambah berat badan saat ini.";
         } elseif ($bmi >= 18.5 && $bmi < 25 && ($goal == 'loss' || $goal == 'gain')) {
-            $warning = "Warning: Your BMI indicates that you are in the normal weight range. It may not be healthy to try to lose or gain weight at this time.";
+            $warning = "BMI Anda menunjukkan bahwa Anda berada dalam rentang berat badan normal. Mungkin tidak sehat untuk mencoba menurunkan atau menambah berat badan saat ini.";
         } elseif ($bmi >= 25 && $bmi < 30 && $goal == 'loss') {
-            $warning = "Warning: Your BMI indicates that you are overweight. It is recommended that you focus on losing weight rather than gaining muscle mass at this time.";
+            $warning = "BMI Anda menunjukkan bahwa Anda kelebihan berat badan. Disarankan agar Anda fokus pada penurunan berat badan daripada peningkatan massa otot saat ini.";
         } elseif ($bmi >= 30 && $goal == 'loss') {
-            $warning = "Warning: Your BMI indicates that you are obese. It is strongly recommended that you focus on losing weight for the sake of your health.";
+            $warning = "BMI Anda menunjukkan bahwa Anda mengalami obesitas. Sangat disarankan agar Anda fokus pada penurunan berat badan demi kesehatan Anda.";
         } else {
             $warning = "";
         }
@@ -1253,7 +1253,7 @@ return response()->json([
 
         if (!$user->vip) { // Jika user belum premium
             $user->vip = true; // Aktifkan premium
-            $user->credits = 9999999;
+            $user->bamboo = 9999999;
             $user->vip_expires_at = Carbon::now()->addDays(7); // Berikan durasi trial 7 hari
             $user->save(); // Simpan perubahan
 
